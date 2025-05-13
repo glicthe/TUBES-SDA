@@ -10,6 +10,15 @@ Dalam tugas besar `struktur data dan algoritma` kali ini kami akan membuat sebua
 <br>
 ## :fallen_leaf: Introduction
 Dengan Kelompok kami yang beranggotakan:
-- Faris Ichsan Alyawa
-- Fauzan Juniar Mulyana
-- Rangga Muhammad Fajar
+- Faris Ichsan Alyawa **(241524010)**
+- Fauzan Juniar Mulyana **(241524011)**
+- Rangga Muhammad Fajar **(2415240__)**
+
+<br>
+<br>
+<br>
+
+## ⚙️ Parts Of The Implementations
+
+
+
