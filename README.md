@@ -12,7 +12,7 @@ Dalam tugas besar `struktur data dan algoritma` kali ini kami akan membuat sebua
 Dengan Kelompok kami yang beranggotakan:
 - Faris Ichsan Alyawa **(241524010)**
 - Fauzan Juniar Mulyana **(241524011)**
-- Rangga Muhammad Fajar **(2415240__)**
+- Rangga Muhamad Fajar **(241524026)**
 
 <br>
 <br>
