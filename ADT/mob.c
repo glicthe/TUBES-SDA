@@ -1,9 +1,7 @@
 #include "mob.h"
 
-mobContainer createMobContainer(){
-	mobContainer C;
-	firstMob(C) = Nil;
-	return C;
+void createMobContainer(mobContainer *C){
+	firstMob(*C) = Nil;
 }
 
 int countMob(mobContainer C){
@@ -23,7 +21,7 @@ int countMob(mobContainer C){
 	return (count);
 }
 
-address createMob(const char* mobType, int health, Action action, mobContainer C){
+address createMob(const char* mobType, int health, mobContainer C){
 	address newMob = (address)malloc(sizeof(Mob));
 	if (newMob == Nil){
 		printf("Error: Memory Allocation failed");
@@ -52,7 +50,6 @@ address createMob(const char* mobType, int health, Action action, mobContainer C
 	mobActionQuantity(newMob) = 0;
 	
 	mobHealth(newMob) = health;
-	mobAction(newMob) = action;
 
 	return newMob;
 }
@@ -143,6 +140,11 @@ void attacked (Action playerAction, address selectedMob, mobContainer *C){
 void heal(address selectedMob){
 	if (selectedMob != Nil){
 		mobHealth(selectedMob) += mobActionQuantity(selectedMob);
+		if (mobHealth(selectedMob) > 14 && strcmp(mobType(selectedMob), "Ghost")){
+			mobHealth(selectedMob) = 14; 
+		} else if (mobHealth(selectedMob) > 16 && strcmp(mobType(selectedMob), "Goblin")){
+			mobHealth(selectedMob) = 16; 
+		}
 	}
 }
 
