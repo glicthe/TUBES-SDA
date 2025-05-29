@@ -1,5 +1,6 @@
 #include "mob.h"
 
+
 void createMobContainer(mobContainer *C){
 	firstMob(*C) = Nil;
 }
@@ -32,7 +33,7 @@ address createMob(const char* mobType, int health, mobContainer C){
 	mobNext(newMob) = Nil;
 	
 	int count = countMob(C);
-	mobCounter(newMob) = count;
+	mobCounter(newMob) = count + 1;
 	
 	mobType(newMob) = (char*)malloc(strlen(mobType) + 1);
 	if (mobType(newMob) == Nil){
@@ -54,16 +55,19 @@ address createMob(const char* mobType, int health, mobContainer C){
 	return newMob;
 }
 
-void InsertLast(mobContainer *C, address selectedMob){
-    address Last;
+void InsertLast(mobContainer *C, address selectedMob) {
     if (firstMob(*C) != Nil) {
-        Last = firstMob(*C);
-        while (mobNext(Last) != Nil){
+        address Last = firstMob(*C);
+        while (mobNext(Last) != Nil) {
             Last = mobNext(Last);
         }
-        mobNext(Last) = selectedMob;
+        mobNext(Last) = selectedMob;           
+        mobPrev(selectedMob) = Last;           
+        mobNext(selectedMob) = Nil;            
     } else {
-        firstMob(*C) = selectedMob;
+        firstMob(*C) = selectedMob;            
+        mobPrev(selectedMob) = Nil;            
+        mobNext(selectedMob) = Nil;            
     }
 }
 
@@ -72,14 +76,12 @@ void deleteMob(mobContainer *C, address mobToDelete) {
         return;
     }
     
-    // If it's the first mob in the list
     if (firstMob(*C) == mobToDelete) {
         firstMob(*C) = mobNext(mobToDelete);
         if (mobNext(mobToDelete) != Nil) {
             mobPrev(mobNext(mobToDelete)) = Nil;
         }
     } else {
-        // Connect previous node to next node
         if (mobPrev(mobToDelete) != Nil) {
             mobNext(mobPrev(mobToDelete)) = mobNext(mobToDelete);
         }
@@ -88,7 +90,6 @@ void deleteMob(mobContainer *C, address mobToDelete) {
         }
     }
     
-    // Free the memory
     if (mobType(mobToDelete) != Nil) {
         free(mobType(mobToDelete));
     }
@@ -147,31 +148,75 @@ void heal(address selectedMob){
 		}
 	}
 }
-
  
 int randNumGenerator(){
 	int min = 1, max = 10;
 	
-	int value = rand() % (max - min + 1) + min;
+	int value = rand() % (max - min  + 1) + min;
 	return value;
 }
 
-void randAction(int value, address selectedMob){
-	if (value <= 7) {
-		free(mobActionType(selectedMob));
-		mobActionType(selectedMob) = (char*)malloc(strlen("attack") + 1);
-		strcpy(mobActionType(selectedMob), "attack");
-		
-		if (strcmp(mobType(selectedMob), "Ghost")){
+void randAction(mobContainer C){
+	address selectedMob = firstMob(C);
+	
+	while (selectedMob != Nil){
+		int value = randNumGenerator();
+		if (value <= 7) {
+			free(mobActionType(selectedMob));
+			mobActionType(selectedMob) = (char*)malloc(strlen("attack") + 1);
+			strcpy(mobActionType(selectedMob), "attack");
+			
+			if (strcmp(mobType(selectedMob), "Ghost")){
+				mobActionQuantity(selectedMob) = 5;
+			} else if (strcmp(mobType(selectedMob), "Goblin")){
+				mobActionQuantity(selectedMob) = 7;			
+			}
+		} else {
+			free(mobActionType(selectedMob));
+			mobActionType(selectedMob) = (char*)malloc(strlen("heal") + 1);
+			strcpy(mobActionType(selectedMob), "heal");
+			
 			mobActionQuantity(selectedMob) = 5;
-		} else if (strcmp(mobType(selectedMob), "Goblin")){
-			mobActionQuantity(selectedMob) = 7;			
 		}
-	} else {
-		free(mobActionType(selectedMob));
-		mobActionType(selectedMob) = (char*)malloc(strlen("heal") + 1);
-		strcpy(mobActionType(selectedMob), "heal");
-		
-		mobActionQuantity(selectedMob) = 5;
+		selectedMob = mobNext(selectedMob);
+	}
+}
+
+void printMobContainer(mobContainer C) {
+    address current = firstMob(C);
+    printf("Mob Container:\n");
+
+    if (current == Nil) {
+        printf("  (Empty)\n");
+        return;
+    }
+
+    while (current != Nil) {
+        printf("  Mob Counter	 : %d\n", mobCounter(current));
+        printf("  Mob Type	 : %s\n", mobType(current));
+        printf("  Health	 : %d\n", mobHealth(current));
+        printf("  Action Type	 : %s\n", mobActionType(current));
+        printf("  Action Quantity: %d\n", mobActionQuantity(current));
+        printf("--------------------\n");
+
+        current = mobNext(current);
+    }
+}
+
+void randGenerateMob(mobContainer *C){ 
+	
+	int makeMob = (randNumGenerator() % 2) + 1;
+	while (makeMob != 0){
+		int randNum = randNumGenerator();
+		if (randNum < 6){
+			address newMob = createMob("Ghost", 14, *C);
+			InsertLast(C, newMob);
+			randAction(*C);
+		} else {
+			address newMob = createMob("Goblin", 16, *C);
+			InsertLast(C, newMob);
+			randAction(*C);
+		}
+		makeMob -= 1;
 	}
 }
