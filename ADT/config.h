@@ -47,6 +47,7 @@ void gotoxy(int x, int y);
 void clearScreen();
 void hideCursor();
 void setTextColor(int color);
+int randNumGenerator();
 
 // Fungsi-fungsi warna
 void setColorRed();

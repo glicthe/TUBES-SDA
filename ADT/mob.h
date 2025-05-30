@@ -13,14 +13,14 @@ typedef struct Action {
 #define actionType(P) (P).actionType
 #define damage(P) (P).quantity
 
-typedef struct Mob* address;
+typedef struct Mob* mobAddress;
 typedef struct Mob {
-    address prev;       	// Previous node pointer
+    mobAddress prev;       	// Previous node pointer
     int mobCounter;			// Count Mob
 	char* mobType;         	// Mob type (string)
     int health;            	// Health points
     Action action;         	// Action struct
-    address next;          	// Next node pointer
+    mobAddress next;          	// Next node pointer
 } Mob;
 
 #define mobPrev(P) (P)->prev
@@ -33,30 +33,30 @@ typedef struct Mob {
 #define mobActionType(P) (P)->action.actionType
 
 typedef struct {
-	address firstMob;
+	mobAddress firstMob;
 } mobContainer;
 
 #define firstMob(P) (P).firstMob
 // Create function
 void createMobContainer(mobContainer *C);
-address createMob(const char* mobType, int health, mobContainer C);
+mobAddress createMob(const char* mobType, int health, mobContainer C);
 
 // read function
-address search(mobContainer C, const char* mobType, int mobPosition);
+mobAddress search(mobContainer C, const char* mobType, int mobPosition);
 int countMob(mobContainer C);
-void InsertLast(mobContainer *C, address selectedMob);
-void printMobContainer(mobContainer C);
+void InsertLast(mobContainer *C, mobAddress selectedMob);
+void printMobContainer(mobContainer C, int startCol, int startRow);
 
 // delete function
-void deleteMob(mobContainer *C, address mobToDelete);
+void deleteMob(mobContainer *C, mobAddress mobToDelete);
 void checkMobHealth(mobContainer *C);
 
 // update function
-void attacked(Action playerAction, address selectedMob, mobContainer *C);
-void heal(address sselectedMob);
+void attacked(Action playerAction, mobAddress selectedMob, mobContainer *C);
+void heal(mobAddress selectedMob);
+int attack(mobAddress selectedMob);
 
 // random generator
-int randNumGenerator();
 void randAction(mobContainer C);
 void randGenerateMob(mobContainer *C);
 

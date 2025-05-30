@@ -210,6 +210,8 @@ void executeMenuAction(int menuId) {
             printf("  You start with a basic deck of cards...");
             gotoxy(startCol, startRow + 6);
             printf("  Choose your path wisely and build your deck strategically!");
+            Sleep(2000);
+            inGame(startCol, startRow);
             break;
             
         case 2:

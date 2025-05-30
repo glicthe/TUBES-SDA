@@ -7,7 +7,7 @@ void createMobContainer(mobContainer *C){
 
 int countMob(mobContainer C){
 	int count = 0;
-    address P;
+    mobAddress P;
 	if (firstMob(C) != Nil){
 	    P = firstMob(C);
 	    for (;;) {
@@ -22,8 +22,8 @@ int countMob(mobContainer C){
 	return (count);
 }
 
-address createMob(const char* mobType, int health, mobContainer C){
-	address newMob = (address)malloc(sizeof(Mob));
+mobAddress createMob(const char* mobType, int health, mobContainer C){
+	mobAddress newMob = (mobAddress)malloc(sizeof(Mob));
 	if (newMob == Nil){
 		printf("Error: Memory Allocation failed");
 		return Nil;
@@ -55,9 +55,9 @@ address createMob(const char* mobType, int health, mobContainer C){
 	return newMob;
 }
 
-void InsertLast(mobContainer *C, address selectedMob) {
+void InsertLast(mobContainer *C, mobAddress selectedMob) {
     if (firstMob(*C) != Nil) {
-        address Last = firstMob(*C);
+        mobAddress Last = firstMob(*C);
         while (mobNext(Last) != Nil) {
             Last = mobNext(Last);
         }
@@ -71,7 +71,7 @@ void InsertLast(mobContainer *C, address selectedMob) {
     }
 }
 
-void deleteMob(mobContainer *C, address mobToDelete) {
+void deleteMob(mobContainer *C, mobAddress mobToDelete) {
     if (mobToDelete == Nil || C == Nil) {
         return;
     }
@@ -100,8 +100,8 @@ void deleteMob(mobContainer *C, address mobToDelete) {
 }
 
 void checkMobHealth(mobContainer *C){
-	address curr = firstMob(*C);
-	address next;
+	mobAddress curr = firstMob(*C);
+	mobAddress next;
 	
 	while (curr != Nil){
 		next = mobNext(curr);
@@ -113,8 +113,8 @@ void checkMobHealth(mobContainer *C){
 	}
 }
 
-address search(mobContainer C, const char* mobType, int mobPosition){
-    address mob;
+mobAddress search(mobContainer C, const char* mobType, int mobPosition){
+    mobAddress mob;
     boolean found = false;
     mob = firstMob(C);
     while ((mob != Nil) && (!found)){
@@ -127,8 +127,8 @@ address search(mobContainer C, const char* mobType, int mobPosition){
     return (mob);
 }
 
-void attacked (Action playerAction, address selectedMob, mobContainer *C){
-	// address selectedMob = search(C, mobType);
+void attacked (Action playerAction, mobAddress selectedMob, mobContainer *C){
+	// mobAddress selectedMob = search(C, mobType);
 	if (selectedMob != Nil){
 		mobHealth(selectedMob) -= damage(playerAction);
 	}
@@ -138,26 +138,26 @@ void attacked (Action playerAction, address selectedMob, mobContainer *C){
 	}
 }
 
-void heal(address selectedMob){
+void heal(mobAddress selectedMob){
 	if (selectedMob != Nil){
 		mobHealth(selectedMob) += mobActionQuantity(selectedMob);
-		if (mobHealth(selectedMob) > 14 && strcmp(mobType(selectedMob), "Ghost")){
+		if (mobHealth(selectedMob) > 14 && strcmp(mobType(selectedMob), "Ghost") == 0 ){
 			mobHealth(selectedMob) = 14; 
-		} else if (mobHealth(selectedMob) > 16 && strcmp(mobType(selectedMob), "Goblin")){
+		} else if (mobHealth(selectedMob) > 16 && strcmp(mobType(selectedMob), "Goblin") == 0){
 			mobHealth(selectedMob) = 16; 
 		}
 	}
 }
- 
-int randNumGenerator(){
-	int min = 1, max = 10;
-	
-	int value = rand() % (max - min  + 1) + min;
-	return value;
+
+int attack(mobAddress selectedMob){
+	if (selectedMob != Nil){
+		return mobActionQuantity(selectedMob);
+	}
 }
+ 
 
 void randAction(mobContainer C){
-	address selectedMob = firstMob(C);
+	mobAddress selectedMob = firstMob(C);
 	
 	while (selectedMob != Nil){
 		int value = randNumGenerator();
@@ -166,9 +166,9 @@ void randAction(mobContainer C){
 			mobActionType(selectedMob) = (char*)malloc(strlen("attack") + 1);
 			strcpy(mobActionType(selectedMob), "attack");
 			
-			if (strcmp(mobType(selectedMob), "Ghost")){
+			if (strcmp(mobType(selectedMob), "Ghost") == 0){
 				mobActionQuantity(selectedMob) = 5;
-			} else if (strcmp(mobType(selectedMob), "Goblin")){
+			} else if (strcmp(mobType(selectedMob), "Goblin") == 0){
 				mobActionQuantity(selectedMob) = 7;			
 			}
 		} else {
@@ -182,38 +182,64 @@ void randAction(mobContainer C){
 	}
 }
 
-void printMobContainer(mobContainer C) {
-    address current = firstMob(C);
-    printf("Mob Container:\n");
+void printMobContainer(mobContainer C, int startCol, int startRow) {
+    mobAddress current = firstMob(C);
+    gotoxy(startCol, startRow - 1);
+    setColorLightRed();
+    printf("=========[Mob Status]=========");
 
     if (current == Nil) {
         printf("  (Empty)\n");
         return;
     }
-
+	int i = 0;
     while (current != Nil) {
-        printf("  Mob Counter	 : %d\n", mobCounter(current));
-        printf("  Mob Type	 : %s\n", mobType(current));
-        printf("  Health	 : %d\n", mobHealth(current));
-        printf("  Action Type	 : %s\n", mobActionType(current));
-        printf("  Action Quantity: %d\n", mobActionQuantity(current));
-        printf("--------------------\n");
-
+    	gotoxy(startCol, startRow + i); i++;
+    	setColorBrightWhite();
+    	printf("[%d]", mobCounter(current));
+    	
+		gotoxy(startCol, startRow + i); i++;
+    	setColorDefault();
+		printf("+----------------------------+");
+		
+		gotoxy(startCol, startRow + i); i++;
+        setColorLightRed();
+        printf("  ENEMY	[%s]", mobType(current));
+        
+		gotoxy(startCol, startRow + i); i++;
+        setColorDefault();
+		printf("+----------------------------+");
+        
+		gotoxy(startCol, startRow + i); i++;
+        setColorGreen();
+		printf("  HEALTH	[%d]", mobHealth(current));
+        
+		gotoxy(startCol, startRow + i); i++;
+        setColorDefault();
+		printf("+----------------------------+");
+        
+		gotoxy(startCol, startRow + i); i++;
+        setColorBrightWhite();
+		printf("  NEXT TURN => %s [%d]", mobActionType(current), mobActionQuantity(current));
+        
+		gotoxy(startCol, startRow + i); i++;
+        setColorDefault();
+		printf("+----------------------------+\n");
+		i++;
         current = mobNext(current);
     }
 }
 
 void randGenerateMob(mobContainer *C){ 
-	
 	int makeMob = (randNumGenerator() % 2) + 1;
 	while (makeMob != 0){
 		int randNum = randNumGenerator();
 		if (randNum < 6){
-			address newMob = createMob("Ghost", 14, *C);
+			mobAddress newMob = createMob("Ghost", GHOST, *C);
 			InsertLast(C, newMob);
 			randAction(*C);
 		} else {
-			address newMob = createMob("Goblin", 16, *C);
+			mobAddress newMob = createMob("Goblin", GOBLIN, *C);
 			InsertLast(C, newMob);
 			randAction(*C);
 		}

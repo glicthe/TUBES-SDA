@@ -4,22 +4,22 @@
 void displayBorder() {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns, rows;
-    
+
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    
-    setTextColor(7);
-    
+
+    setTextColor(7); // White color for border
+
     // Top border
     gotoxy(0, 0);
     int i;
     for(i = 0; i < columns; i++) printf("=");
-    
+
     // Bottom border
     gotoxy(0, rows - 1);
     for(i = 0; i < columns; i++) printf("=");
-    
+
     // Side borders
     for(i = 1; i < rows - 1; i++) {
         gotoxy(0, i);
@@ -33,25 +33,51 @@ void displayBorder() {
 void displayGameTitle() {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns;
-    
+
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    
-    int availableWidth = columns - 4;
-    
-    // Lebar ASCII art
-    int artWidth = 200;
-    
-    // Posisi mulai dengan mempertimbangkan border - lebih ke kiri
-    int startCol = 5; 
-    
-    // Pastikan tidak keluar dari area yang aman
-    if (startCol < 3) startCol = 3; // Minimal 3 dari kiri (setelah border)
-    if (startCol + artWidth > columns - 3) startCol = columns - artWidth - 3; // Maksimal sampai sebelum border kanan
-    
+
+    // ------------------- MODIFIKASI DIMULAI DI SINI -------------------
+    // GANTI NILAI INI dengan lebar visual aktual dari baris terpanjang pada ASCII art judul Anda.
+    // Hitung karakter yang terlihat, jangan sertakan escape codes ANSI.
+    // Contoh perhitungan kasar untuk baris terpanjang:
+    // "          ---__----___/ __ \\--  || |  --/ __ \\___----__---  " (sekitar 58 char) +
+    // "  (_______)--------------------------------------------------------------------------------------------------------------------------(_______)" (sekitar 130 char)
+    // Total perkiraan = 188. Anda HARUS menghitungnya dengan akurat.
+    int artWidth = 188; // <--- SESUAIKAN NILAI INI!
+
+    // Lebar yang tersedia untuk seni ASCII di dalam border (border kiri "||" dan kanan "||" masing-masing 2 karakter)
+    int availableWidthForArt = columns - 4;
+
+    // Hitung kolom awal untuk memusatkan seni ASCII
+    int startCol = (availableWidthForArt - artWidth) / 2;
+
+    // Tambahkan offset untuk border kiri ("||") agar posisi dihitung dari setelah border
+    startCol += 2;
+
+    // Pastikan seni ASCII tidak menimpa border kiri
+    if (startCol < 3) { // Minimal kolom ke-3 (setelah "||")
+        startCol = 3;
+    }
+
+    // Pastikan seni ASCII tidak menimpa border kanan
+    // columns - 2 adalah posisi tepat sebelum border kanan "||"
+    if (startCol + artWidth > columns - 2) {
+        // Jika seni ASCII terlalu lebar untuk konsol saat ini dan akan menimpa border kanan:
+        if (columns > artWidth + 4) { // Cek apakah ada cukup ruang jika dipusatkan
+             // Jika masih ada ruang, geser ke kiri agar pas sebelum border kanan
+            startCol = columns - artWidth - 2;
+        } else {
+            // Jika konsol sangat sempit, mulai dari kiri setelah border kiri
+            startCol = 3;
+        }
+    }
+    // ------------------- MODIFIKASI BERAKHIR DI SINI -------------------
+
     // ASCII art title Anda dengan posisi yang diperbaiki
+    // (Bagian printf di bawah ini tetap sama, hanya nilai startCol yang memengaruhi posisinya)
     gotoxy(startCol, 3);
-    printf("\033[1;32m                                 \033[35m**                                           \033[0m");
+    printf("\033[1;32m                                 \033[35m** \033[0m");
     gotoxy(startCol, 4);
     printf("\033[1;32m                                 \033[33m||                                           ");
     gotoxy(startCol, 5);
@@ -102,40 +128,46 @@ void displayGameTitle() {
 void showLoading(char* message) {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns, rows;
-    
+
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
     rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    
+
     int startRow = rows / 3;
     int availableWidth = columns - 4;
-    int startCol = 2 + (availableWidth - 50) / 2;
-    
-    if (startCol < 3) startCol = 3;
-    if (startCol + 50 > columns - 3) startCol = columns - 53;
-    
+    int boxWidth = 50; // Lebar box loading
+    int startColMessage = 2 + (availableWidth - boxWidth) / 2; // Disesuaikan dengan boxWidth
+
+    if (startColMessage < 3) startColMessage = 3;
+    if (startColMessage + boxWidth > columns - 3) startColMessage = columns - boxWidth - 3;
+
     clearScreen();
     displayBorder();
-    
+
     setTextColor(7);
-    gotoxy(startCol, startRow);
-    printf("+================================================+");
-    gotoxy(startCol, startRow + 1);
+    gotoxy(startColMessage, startRow);
+    printf("+================================================+"); // Lebar 50 karakter
+    gotoxy(startColMessage, startRow + 1);
     printf("|                                                |");
-    gotoxy(startCol, startRow + 2);
-    printf("| %-46s |", message);
-    gotoxy(startCol, startRow + 3);
+    gotoxy(startColMessage, startRow + 2);
+    printf("| %-*s |", boxWidth - 4, message); // Sesuaikan padding dengan boxWidth
+    gotoxy(startColMessage, startRow + 3);
     printf("|                                                |");
-    gotoxy(startCol, startRow + 4);
+    gotoxy(startColMessage, startRow + 4);
     printf("+================================================+");
-    
+
     char loading[] = "|/-\\";
     int i;
     for(i = 0; i < 20; i++) {
-        gotoxy(startCol + 20, startRow + 6);
+        // Pusatkan teks loading di bawah kotak pesan
+        int loadingTextLen = strlen("Loading X"); // X adalah karakter animasi
+        int startColLoading = 2 + (availableWidth - loadingTextLen) / 2;
+        if (startColLoading <3) startColLoading = 3;
+
+        gotoxy(startColLoading, startRow + 6);
         setTextColor(14);
         printf("Loading %c", loading[i % 4]);
         setTextColor(7);
         Sleep(100);
     }
-} 
+}

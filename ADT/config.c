@@ -24,6 +24,13 @@ void hideCursor() {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
+int randNumGenerator(){
+	int min = 1, max = 10;
+	
+	int value = rand() % (max - min  + 1) + min;
+	return value;
+}
+
 void setTextColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }

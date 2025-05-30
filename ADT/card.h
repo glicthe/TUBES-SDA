@@ -3,6 +3,7 @@
 
 #include "config.h"
 
+
 // ==========================
 // Struct & Macros
 // ==========================
@@ -58,6 +59,8 @@ typedef struct {
 // Create
 void initDeck(cardDeck *D);
 cardAddress createCard(const char* name, const char* type, int cost, int value);
+void staterDeckInventory(cardDeck *D);
+void initDeckInventoryToHand(cardDeck inventory, cardDeck *hand);
 
 // Insert & Navigation
 void addCardToDeck(cardDeck *D, cardAddress C);
@@ -65,6 +68,8 @@ void moveLeft(cardDeck *D);
 void moveRight(cardDeck *D);
 void printCurrentCard(cardDeck D);
 void printDeck(cardDeck D);
+int countDeck(cardDeck D);
+
 
 // Remove (play card)
 cardAddress playCurrentCard(cardDeck *D);

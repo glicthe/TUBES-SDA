@@ -1,8 +1,9 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "config.h"
 #include "display.h"
+#include "inGameLayout.h"
+
 
 // Struktur untuk item menu
 typedef struct {

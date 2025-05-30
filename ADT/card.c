@@ -1,7 +1,4 @@
 #include "card.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 void initDeck(cardDeck *D) {
     deckHead(*D) = NULL;
@@ -24,6 +21,59 @@ cardAddress createCard(const char* name, const char* type, int cost, int value) 
     cardNext(C) = NULL;
 
     return C;
+}
+
+void starterDeckInventory(cardDeck *D){
+	int Num;
+	while (Num < 10){
+		if (Num <= 3) {
+			cardAddress addCard = createCard("Slash", "Attack", 1, 4);
+			addCardToDeck(D, addCard);
+		} else if (Num >= 4 && Num <= 6) {
+			cardAddress addCard = createCard("Block", "Shield", 1, 5);
+			addCardToDeck(D, addCard);
+		} else if (Num == 7) {
+			cardAddress addCard = createCard("Draw", "Draw", 2, 3);
+			addCardToDeck(D, addCard);
+		} else {
+			cardAddress addCard = createCard("SuperSlash", "SpecialAttack", 3, 9);
+			addCardToDeck(D, addCard);
+		}
+		Num++;
+	}
+}
+
+void initDeckInventoryToHand(cardDeck inventory, cardDeck *hand) {
+    int i, num, min, max, count = 0;
+    
+    int countInv = countDeck(inventory);
+    if (countInv < 5) {
+        printf("Error: Inventory must have at least 5 cards.\n");
+        return;
+    }
+
+    min = 0;
+    max = countInv - 1;
+    int *used = (int*)calloc(countInv, sizeof(int));
+    while (count < 5) {
+        num = rand() % (max - min + 1) + min;
+        
+        if (used[num] == 0) {
+            used[num] = 1; 
+            printf("%d ", num);
+            cardAddress selectedCard = deckHead(inventory);
+
+            for (i = 0; i < num; i++) {
+                selectedCard = cardNext(selectedCard); 
+            }
+            
+            // Create a copy of the selected card to avoid modifying the original inventory
+            cardAddress moveCopyCard = createCard(cardName(selectedCard), cardType(selectedCard), cardCost(selectedCard), cardEffect(selectedCard));
+            addCardToDeck(hand, moveCopyCard);
+            count++;            
+        }
+    }
+    free(used);
 }
 
 void addCardToDeck(cardDeck *D, cardAddress C) {
@@ -91,6 +141,23 @@ void printDeck(cardDeck D) {
         printf("Card %d: %s (%s), Cost: %d, Effect: %d\n", i++, cardName(temp), cardType(temp), cardCost(temp), cardEffect(temp));
         temp = cardNext(temp);
     }
+}
+
+int countDeck(cardDeck D){
+	int count = 0;
+    cardAddress P;
+	if (deckHead(D) != Nil){
+	    P = deckHead(D);
+	    for (;;) {
+	        if (P == Nil){
+	            break;
+	        } else {
+	            count++;
+	            P = cardNext(P);
+	        }
+	    } 
+	}
+	return (count);
 }
 
 void freeCard(cardAddress C) {

@@ -1,0 +1,11 @@
+#ifndef INGAMELAYOUT_H
+#define INGAMELAYOUT_H
+
+#include "display.h"
+
+void inGame(int startCol, int startRow);
+void headBar(int startCol, int max, Player P);
+void playerCardInHand();
+
+
+#endif 

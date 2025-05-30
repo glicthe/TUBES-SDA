@@ -3,6 +3,7 @@
 
 #include "card.h"
 
+
 #define MAX_PLAYER_HEALTH 90
 #define MAX_PLAYER_ENERGY 3
 
@@ -23,7 +24,7 @@ typedef struct Player {
 Player createPlayer();
 
 // Status
-void printPlayerStatus(Player P);
+void printPlayerStatus(Player P, int startCol, int startRow);
 
 // Turn
 void startTurn(Player *P);

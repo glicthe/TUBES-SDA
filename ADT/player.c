@@ -1,7 +1,4 @@
 #include "player.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 Player createPlayer() {
 	Player P;
@@ -9,7 +6,7 @@ Player createPlayer() {
 	P.health = MAX_PLAYER_HEALTH;
 	P.energy = MAX_PLAYER_ENERGY;
 	P.shield = 0;
-	P.gold = 0;
+	P.gold = 10;
 
 	initDeck(&P.hand);
 	initDiscard(&P.discard);
@@ -17,14 +14,48 @@ Player createPlayer() {
 	return P;
 }
 
-void printPlayerStatus(Player P) {
-	printf("===== Player Status =====\n");
-	printf("Name   : %s\n", P.name);
-	printf("HP     : %d\n", P.health);
-	printf("Energy : %d\n", P.energy);
-	printf("Shield : %d\n", P.shield);
-	printf("Gold   : %d\n", P.gold);
-	printf("=========================\n");
+void printPlayerStatus(Player P, int startCol, int startRow) {
+	int i;
+	gotoxy(startCol, startRow - 1);
+    setColorLightCyan();
+	printf("=======[Player Status]=======\n");
+	
+	gotoxy(startCol, startRow + i); i++;
+    setColorDefault();
+	printf("+---------------------------+");
+
+	gotoxy(startCol, startRow + i); i++;
+    setColorBrightWhite();
+    printf("	Name	[%s]", P.name);
+    	
+	gotoxy(startCol, startRow + i); i++;
+    setColorDefault();
+	printf("+---------------------------+");
+	
+	gotoxy(startCol, startRow + i); i++;
+    setColorGreen();
+	printf("	Health	[%d]", P.health);
+	        
+	gotoxy(startCol, startRow + i); i++;
+    setColorDefault();
+	printf("+---------------------------+");
+        
+	gotoxy(startCol, startRow + i); i++;
+    setColorYellow();
+	printf("	Energy	[%d]", P.energy);
+        
+	gotoxy(startCol, startRow + i); i++;
+    setColorDefault();
+	printf("+---------------------------+");
+        
+	gotoxy(startCol, startRow + i); i++;
+    setColorGray();
+	printf("	Shield	[%d]", P.shield);
+        
+	gotoxy(startCol, startRow + i); i++;
+    setColorDefault();
+	printf("+---------------------------+\n");
+
 }
 
 void startTurn(Player *P) {
