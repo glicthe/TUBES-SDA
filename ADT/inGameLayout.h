@@ -5,7 +5,7 @@
 
 void inGame(int startCol, int startRow);
 void headBar(int startCol, int max, Player P);
-void playerCardInHand();
+void battleScreen(int startCol, int startRow, int colunmns, int rows);
 
 
 #endif 

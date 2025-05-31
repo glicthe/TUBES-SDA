@@ -60,14 +60,16 @@ typedef struct {
 void initDeck(cardDeck *D);
 cardAddress createCard(const char* name, const char* type, int cost, int value);
 void staterDeckInventory(cardDeck *D);
-void initDeckInventoryToHand(cardDeck inventory, cardDeck *hand);
+void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand);
 
 // Insert & Navigation
 void addCardToDeck(cardDeck *D, cardAddress C);
 void moveLeft(cardDeck *D);
 void moveRight(cardDeck *D);
-void printCurrentCard(cardDeck D);
-void printDeck(cardDeck D);
+void moveToHead(cardDeck *D);
+void moveToTail(cardDeck *D);
+void printCurrentCard(cardDeck D, int startCol, int startRow);
+void printDeck(cardDeck D, int startCol, int startRRow);
 int countDeck(cardDeck D);
 
 

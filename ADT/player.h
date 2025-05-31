@@ -35,6 +35,6 @@ void takeDamage(Player *P, int damage);
 void useEnergy(Player *P, int amount);
 
 // Play Card
-void playCard(Player *P);
+void playCard(Player *P, cardDeck *Inventory);
 
 #endif

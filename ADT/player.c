@@ -54,7 +54,7 @@ void printPlayerStatus(Player P, int startCol, int startRow) {
         
 	gotoxy(startCol, startRow + i); i++;
     setColorDefault();
-	printf("+---------------------------+\n");
+	printf("+---------------------------+");
 
 }
 
@@ -87,35 +87,32 @@ void useEnergy(Player *P, int amount) {
 	}
 }
 
-void playCard(Player *P) {
-	cardAddress played = playCurrentCard(&P->hand);
-
-	if (!played) {
-		printf("No card to play.\n");
-		return;
-	}
-
+void playCard(Player *P, cardDeck *Inventory) {
+	cardAddress played = currentCard(P->hand);
 	if (cardCost(played) > P->energy) {
-		printf("Not enough energy to play %s.\n", cardName(played));
-		addCardToDeck(&P->hand, played); // return card
 		return;
+	} else {
+		played = playCurrentCard(&P->hand);
+	
+		if (!played) {
+			printf("No card to play.\n");
+			return;
+		}
+	
+	
+		useEnergy(P, cardCost(played));
+	
+		// Simulasi efek
+		if (strcmp(cardType(played), "Attack") == 0) {
+			printf("Would attack enemy for %d damage\n", cardEffect(played));
+		} else if (strcmp(cardType(played), "Shield") == 0) {
+			P->shield += cardEffect(played);
+			printf("Gained %d shield\n", cardEffect(played));
+		} else if (strcmp(cardType(played), "Draw") == 0) {
+			initDeckInventoryToHand(Inventory, &P->hand);
+			
+		}
+	
+		pushDiscard(&P->discard, played);
 	}
-
-	useEnergy(P, cardCost(played));
-
-	printf("Playing card: %s (%s) -> effect: %d\n",
-	       cardName(played), cardType(played), cardEffect(played));
-
-	// Simulasi efek
-	if (strcmp(cardType(played), "Attack") == 0) {
-		printf("Would attack enemy for %d damage\n", cardEffect(played));
-	} else if (strcmp(cardType(played), "Skill") == 0) {
-		P->shield += cardEffect(played);
-		printf("Gained %d shield\n", cardEffect(played));
-	} else if (strcmp(cardType(played), "Heal") == 0) {
-		gainHP(P, cardEffect(played));
-		printf("Healed for %d HP\n", cardEffect(played));
-	}
-
-	pushDiscard(&P->discard, played);
 }

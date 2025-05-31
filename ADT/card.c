@@ -36,41 +36,46 @@ void starterDeckInventory(cardDeck *D){
 			cardAddress addCard = createCard("Draw", "Draw", 2, 3);
 			addCardToDeck(D, addCard);
 		} else {
-			cardAddress addCard = createCard("SuperSlash", "SpecialAttack", 3, 9);
+			cardAddress addCard = createCard("SuperSlash", "Attack", 3, 9);
 			addCardToDeck(D, addCard);
 		}
 		Num++;
 	}
 }
 
-void initDeckInventoryToHand(cardDeck inventory, cardDeck *hand) {
-    int i, num, min, max, count = 0;
+void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand) {
+    int i, num, min, max, drawDeck, count = 0;
     
-    int countInv = countDeck(inventory);
-    if (countInv < 5) {
-        printf("Error: Inventory must have at least 5 cards.\n");
-        return;
-    }
-
+    int countInv = countDeck(*inventory);
+    int countHand = countDeck(*hand);
+    
+	drawDeck = 5 - countHand;
+    if (currentCard(*hand) != Nil && strcmp(cardType(currentCard(*hand)), "Draw") == 0) {
+		drawDeck = 2;
+	}
+	
     min = 0;
     max = countInv - 1;
     int *used = (int*)calloc(countInv, sizeof(int));
-    while (count < 5) {
+    while (count < drawDeck) {
         num = rand() % (max - min + 1) + min;
         
         if (used[num] == 0) {
             used[num] = 1; 
-            printf("%d ", num);
-            cardAddress selectedCard = deckHead(inventory);
+            
+           	currentCard(*inventory) = deckHead(*inventory);
 
             for (i = 0; i < num; i++) {
-                selectedCard = cardNext(selectedCard); 
+                if (cardNext(currentCard(*inventory)) != NULL) {
+                    currentCard(*inventory) = cardNext(currentCard(*inventory));
+                }
             }
             
-            // Create a copy of the selected card to avoid modifying the original inventory
-            cardAddress moveCopyCard = createCard(cardName(selectedCard), cardType(selectedCard), cardCost(selectedCard), cardEffect(selectedCard));
-            addCardToDeck(hand, moveCopyCard);
-            count++;            
+            cardAddress movedCard = playCurrentCard(inventory);
+            if (movedCard) {
+                addCardToDeck(hand, movedCard);
+                count++;
+			}
         }
     }
     free(used);
@@ -89,23 +94,73 @@ void addCardToDeck(cardDeck *D, cardAddress C) {
 void moveLeft(cardDeck *D) {
     if (currentCard(*D) && cardPrev(currentCard(*D))) {
         currentCard(*D) = cardPrev(currentCard(*D));
-    }
+    } else if (cardPrev(currentCard(*D)) == Nil) moveToTail(D);	
 }
 
 void moveRight(cardDeck *D) {
     if (currentCard(*D) && cardNext(currentCard(*D))) {
         currentCard(*D) = cardNext(currentCard(*D));
+    } else if (cardNext(currentCard(*D)) == Nil) moveToHead(D);
+}
+
+void moveToHead(cardDeck *D) {
+    if (currentCard(*D) && deckHead(*D)) {
+        currentCard(*D) = deckHead(*D);
     }
 }
 
-void printCurrentCard(cardDeck D) {
-    if (currentCard(D)) {
-        printf(">> Current Card <<\n");
-        printf("  Name : %s\n", cardName(currentCard(D)));
-        printf("  Type : %s\n", cardType(currentCard(D)));
-        printf("  Cost : %d\n", cardCost(currentCard(D)));
-        printf("  Effect: %d\n", cardEffect(currentCard(D)));
-    } else {
+void moveToTail(cardDeck *D) {
+    if (currentCard(*D) && deckTail(*D)){
+        currentCard(*D) = deckTail(*D);
+    }
+}
+
+
+void printCurrentCard(cardDeck D, int startCol, int startRow) {
+    int i = 23; 
+	if (currentCard(D)) {
+    	
+		gotoxy(startCol, startRow + i); i++;
+    	setColorLightCyan();
+        printf("=======[Current Card]=======\n");
+    	
+		gotoxy(startCol, startRow + i); i++;
+	    setColorDefault();
+		printf("+---------------------------+");
+		
+		gotoxy(startCol, startRow + i); i++;
+        void setColorMagenta();
+		printf("	Card	[%s]", cardName(currentCard(D)));
+        
+        gotoxy(startCol, startRow + i); i++;
+	    setColorDefault();
+		printf("+---------------------------+");
+        
+    	gotoxy(startCol, startRow + i); i++;
+    	setColorLightGreen();
+		printf("	Type	[%s]", cardType(currentCard(D)));
+    	
+    	gotoxy(startCol, startRow + i); i++;
+	    setColorDefault();
+		printf("+---------------------------+");
+		
+    	gotoxy(startCol, startRow + i); i++;
+    	setColorYellow();
+        printf("	Cost	[%d]", cardCost(currentCard(D)));
+    	
+		gotoxy(startCol, startRow + i); i++;
+	    setColorDefault();
+		printf("+---------------------------+");
+		
+		gotoxy(startCol, startRow + i); i++;
+        setColorLightMagenta();
+		printf("	Effect	[%d]", cardEffect(currentCard(D)));
+        
+        gotoxy(startCol, startRow + i); i++;
+	    setColorDefault();
+		printf("+---------------------------+");
+    } else {    	
+    	gotoxy(startCol, startRow + 28);
         printf("No card selected.\n");
     }
 }
@@ -132,13 +187,67 @@ cardAddress playCurrentCard(cardDeck *D) {
     cardNext(played) = NULL;
     cardPrev(played) = NULL;
     return played;
-}
+} 
 
-void printDeck(cardDeck D) {
+void printDeck(cardDeck D, int startCol, int startRow) {
     cardAddress temp = deckHead(D);
-    int i = 1;
-    while (temp) {
-        printf("Card %d: %s (%s), Cost: %d, Effect: %d\n", i++, cardName(temp), cardType(temp), cardCost(temp), cardEffect(temp));
+    int boxTopBot = 15;
+    int boxLeftRight = 10;
+    int i;
+    while (temp != Nil) {
+        i = 1;
+    	gotoxy(startCol, startRow);
+    	if (temp == currentCard(D)) setColorGray();
+		else setColorBrightWhite(); 
+		for(i = 0; i < boxTopBot; i++) printf("-");
+		for(i = 1; i <= boxLeftRight; i++) {
+			gotoxy(startCol, startRow + i);
+			printf("|");
+			gotoxy(startCol + boxTopBot - 1, startRow + i);
+			printf("|");
+		}
+		gotoxy(startCol, startRow + boxLeftRight);
+		for(i = 0; i < boxTopBot; i++) printf("-");
+		
+		gotoxy(startCol, startRow);
+		setColorYellow();
+		printf("[%d]", cardCost(temp));
+		
+		if (strcmp(cardType(temp), "Attack") == 0){
+			gotoxy(startCol + 5, startRow + 2);
+	    	setColorLightRed();
+			printf("  ^  ");
+			gotoxy(startCol + 5, startRow + 3);
+			printf("  |  ");
+			gotoxy(startCol + 5, startRow + 4);
+	    	printf("._|_.");
+	    	gotoxy(startCol + 5, startRow + 5);
+	    	printf("  I  ");
+	    	gotoxy(startCol + 5, startRow + 7);
+	    	if (strcmp(cardName(temp), "SuperSlash") == 0){
+				printf("Super");
+				gotoxy(startCol + 5, startRow + 8);
+				printf("Slash");
+			} else printf("%s", cardName(temp));
+		} else if (strcmp(cardType(temp), "Shield") == 0){
+			setColorLightBlue();
+			gotoxy(startCol + 5, startRow + 2);
+			printf("<--->");
+			gotoxy(startCol + 5, startRow + 3);
+		    printf("|_|_|");
+			gotoxy(startCol + 5, startRow + 4);
+		    printf("|_|_|");
+	    	gotoxy(startCol + 5, startRow + 5);
+		    printf("\\|_|/");
+	    	gotoxy(startCol + 5, startRow + 7);	
+		    printf("%s", cardName(temp));
+		}
+			
+		gotoxy(startCol + boxTopBot - 3, startRow + boxLeftRight);
+		setColorRed();
+		printf("[%d]", cardEffect(temp));
+		setColorBrightWhite();
+        startCol += (boxTopBot + 5);
         temp = cardNext(temp);
     }
 }
