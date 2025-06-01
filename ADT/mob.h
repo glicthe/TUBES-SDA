@@ -2,6 +2,8 @@
 #define MOB_H
 
 #include "config.h"
+#include "Player.h"
+
 #define GHOST 14
 #define GOBLIN 16
 
@@ -34,26 +36,38 @@ typedef struct Mob {
 
 typedef struct {
 	mobAddress firstMob;
+	mobAddress currentMob;
 } mobContainer;
 
 #define firstMob(P) (P).firstMob
+#define currentMob(P) (P).currentMob
+
 // Create function
 void createMobContainer(mobContainer *C);
 mobAddress createMob(const char* mobType, int health, mobContainer C);
+
+// Navigation functions
+void moveLeftMob(mobContainer *C);
+void moveRightMob(mobContainer *C);
+void moveToFirstMob(mobContainer *C);
+void moveToLastMob(mobContainer *C);
 
 // read function
 mobAddress search(mobContainer C, const char* mobType, int mobPosition);
 int countMob(mobContainer C);
 void InsertLast(mobContainer *C, mobAddress selectedMob);
 void printMobContainer(mobContainer C, int startCol, int startRow);
+void printCurrentMob(mobContainer C, int startCol, int startRow);
+void printCurrentMob(mobContainer C, int startCol, int startRow);
 
 // delete function
 void deleteMob(mobContainer *C, mobAddress mobToDelete);
+void deleteCurrentMob(mobContainer* container);
 void checkMobHealth(mobContainer *C);
 
 // update function
-void attacked(Action playerAction, mobAddress selectedMob, mobContainer *C);
-void heal(mobAddress selectedMob);
+void attacked(int damage, mobContainer *C);
+void mobheal(mobAddress *selectedMob);
 int attack(mobAddress selectedMob);
 
 // random generator

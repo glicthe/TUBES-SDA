@@ -3,7 +3,6 @@
 
 #include "card.h"
 
-
 #define MAX_PLAYER_HEALTH 90
 #define MAX_PLAYER_ENERGY 3
 
@@ -34,7 +33,6 @@ void gainHP(Player *P, int amount);
 void takeDamage(Player *P, int damage);
 void useEnergy(Player *P, int amount);
 
-// Play Card
-void playCard(Player *P, cardDeck *Inventory);
+
 
 #endif

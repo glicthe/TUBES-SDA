@@ -3,6 +3,39 @@
 
 void createMobContainer(mobContainer *C){
 	firstMob(*C) = Nil;
+	currentMob(*C) = Nil;
+}
+
+void moveLeftMob(mobContainer *C) {
+    if (currentMob(*C) && mobPrev(currentMob(*C))) {
+        currentMob(*C) = mobPrev(currentMob(*C));
+    } else if (currentMob(*C) && mobPrev(currentMob(*C)) == Nil) {
+        moveToLastMob(C);
+    }
+}
+
+void moveRightMob(mobContainer *C) {
+    if (currentMob(*C) && mobNext(currentMob(*C))) {
+        currentMob(*C) = mobNext(currentMob(*C));
+    } else if (currentMob(*C) && mobNext(currentMob(*C)) == Nil) {
+        moveToFirstMob(C);
+    }
+}
+
+void moveToFirstMob(mobContainer *C) {
+    if (firstMob(*C)) {
+        currentMob(*C) = firstMob(*C);
+    }
+}
+
+void moveToLastMob(mobContainer *C) {
+    if (firstMob(*C)) {
+        mobAddress last = firstMob(*C);
+        while (mobNext(last) != Nil) {
+            last = mobNext(last);
+        }
+        currentMob(*C) = last;
+    }
 }
 
 int countMob(mobContainer C){
@@ -23,36 +56,28 @@ int countMob(mobContainer C){
 }
 
 mobAddress createMob(const char* mobType, int health, mobContainer C){
-	mobAddress newMob = (mobAddress)malloc(sizeof(Mob));
-	if (newMob == Nil){
-		printf("Error: Memory Allocation failed");
-		return Nil;
-	}
-	
-	mobPrev(newMob) = Nil;
-	mobNext(newMob) = Nil;
-	
-	int count = countMob(C);
-	mobCounter(newMob) = count + 1;
-	
-	mobType(newMob) = (char*)malloc(strlen(mobType) + 1);
-	if (mobType(newMob) == Nil){
-		printf("Error: memory allocation for mobType");
-		return Nil;
-	}
-	strcpy(mobType(newMob), mobType);
-	
-	mobActionType(newMob) = (char*)malloc(strlen(mobType) + 1);
-	if (mobType(newMob) == Nil){
-		printf("Error: memory allocation for mobType");
-		return Nil;
-	}
-	mobActionType(newMob) = Nil;
-	mobActionQuantity(newMob) = 0;
-	
-	mobHealth(newMob) = health;
+    mobAddress newMob = (mobAddress)malloc(sizeof(Mob));
+    if (newMob == Nil){
+        printf("Error: Memory Allocation failed");
+        return Nil;
+    }
+    
+    mobPrev(newMob) = Nil;
+    mobNext(newMob) = Nil;
+    
+    mobType(newMob) = (char*)malloc(strlen(mobType) + 1);
+    if (mobType(newMob) == Nil){
+        printf("Error: memory allocation for mobType");
+        return Nil;
+    }
+    strcpy(mobType(newMob), mobType);
+    
+    mobActionType(newMob) = Nil;
+    mobActionQuantity(newMob) = 0;
+    
+    mobHealth(newMob) = health;
 
-	return newMob;
+    return newMob;
 }
 
 void InsertLast(mobContainer *C, mobAddress selectedMob) {
@@ -67,50 +92,83 @@ void InsertLast(mobContainer *C, mobAddress selectedMob) {
     } else {
         firstMob(*C) = selectedMob;            
         mobPrev(selectedMob) = Nil;            
-        mobNext(selectedMob) = Nil;            
+        mobNext(selectedMob) = Nil;
+        currentMob(*C) = selectedMob;      
+    }
+    
+    // Assign mobCounter based on current count
+    mobAddress temp = firstMob(*C);
+    int counter = 1;
+    while (temp != Nil) {
+        mobCounter(temp) = counter++;
+        temp = mobNext(temp);
     }
 }
 
-void deleteMob(mobContainer *C, mobAddress mobToDelete) {
-    if (mobToDelete == Nil || C == Nil) {
-        return;
+void deleteMob(mobContainer* container, mobAddress mobToDelete) {
+    if (container == NULL || mobToDelete == NULL) {
+        return; // Exit early if invalid parameters
     }
     
-    if (firstMob(*C) == mobToDelete) {
-        firstMob(*C) = mobNext(mobToDelete);
-        if (mobNext(mobToDelete) != Nil) {
-            mobPrev(mobNext(mobToDelete)) = Nil;
-        }
-    } else {
-        if (mobPrev(mobToDelete) != Nil) {
-            mobNext(mobPrev(mobToDelete)) = mobNext(mobToDelete);
-        }
-        if (mobNext(mobToDelete) != Nil) {
-            mobPrev(mobNext(mobToDelete)) = mobPrev(mobToDelete);
-        }
-    }
-    
-    if (mobType(mobToDelete) != Nil) {
+    if (mobType(mobToDelete) != NULL) {
         free(mobType(mobToDelete));
     }
-    if (mobActionType(mobToDelete) != Nil) {
+    if (mobActionType(mobToDelete) != NULL) {
         free(mobActionType(mobToDelete));
     }
+    
+    if (mobPrev(mobToDelete) == NULL && mobNext(mobToDelete) == NULL) {
+        firstMob(*container) = NULL;
+        currentMob(*container) = NULL;
+    }
+    else if (mobPrev(mobToDelete) == NULL) {
+        firstMob(*container) = mobNext(mobToDelete);
+        mobPrev(mobNext(mobToDelete)) = NULL;
+        
+        if (currentMob(*container) == mobToDelete) {
+            currentMob(*container) = mobNext(mobToDelete);
+        }
+    }
+    
+    else {
+        mobNext(mobPrev(mobToDelete)) = mobNext(mobToDelete);
+        
+        if (mobNext(mobToDelete) != NULL) {
+            mobPrev(mobNext(mobToDelete)) = mobPrev(mobToDelete);
+        }
+        
+        if (currentMob(*container) == mobToDelete) {
+            currentMob(*container) = (mobNext(mobToDelete) != NULL) ? mobNext(mobToDelete) : mobPrev(mobToDelete);
+        }
+    }
+    
     free(mobToDelete);
 }
 
+void deleteCurrentMob(mobContainer* container) {
+    if (container == NULL || currentMob(*container) == NULL) {
+        return; // Nothing to delete
+    }
+    
+    mobAddress mobToDelete = currentMob(*container);
+    
+    if (mobNext(mobToDelete) != NULL) {
+        currentMob(*container) = mobNext(mobToDelete);
+    } else if (mobPrev(mobToDelete) != NULL) {
+        currentMob(*container) = mobPrev(mobToDelete);
+    } else {
+        currentMob(*container) = NULL;
+    }
+    
+    deleteMob(container, mobToDelete);
+}
+
 void checkMobHealth(mobContainer *C){
-	mobAddress curr = firstMob(*C);
-	mobAddress next;
+	mobAddress curr = currentMob(*C);
 	
-	while (curr != Nil){
-		next = mobNext(curr);
-		
-		if (mobHealth(curr) <= 0){
-			deleteMob(C, curr);
-		}
-		curr = next;
-	}
+	if (curr != Nil && mobHealth(curr) <= 0){
+		deleteCurrentMob(C);
+	}	
 }
 
 mobAddress search(mobContainer C, const char* mobType, int mobPosition){
@@ -118,7 +176,7 @@ mobAddress search(mobContainer C, const char* mobType, int mobPosition){
     boolean found = false;
     mob = firstMob(C);
     while ((mob != Nil) && (!found)){
-        if (strcmp(mobType(mob), mobType) && mobCounter(mob) == mobPosition){
+        if (strcmp(mobType(mob), mobType) == 0 && mobCounter(mob) == mobPosition){
             found = true;
         } else {
             mob = mobNext(mob);
@@ -127,24 +185,19 @@ mobAddress search(mobContainer C, const char* mobType, int mobPosition){
     return (mob);
 }
 
-void attacked (Action playerAction, mobAddress selectedMob, mobContainer *C){
-	// mobAddress selectedMob = search(C, mobType);
-	if (selectedMob != Nil){
-		mobHealth(selectedMob) -= damage(playerAction);
-	}
-	
-	if (mobHealth(selectedMob) <= 0){
-		deleteMob(C, selectedMob);
+void attacked (int damage, mobContainer *C){
+	if (currentMob(*C) != Nil){
+		mobHealth(currentMob(*C)) -= damage;
 	}
 }
 
-void heal(mobAddress selectedMob){
-	if (selectedMob != Nil){
-		mobHealth(selectedMob) += mobActionQuantity(selectedMob);
-		if (mobHealth(selectedMob) > 14 && strcmp(mobType(selectedMob), "Ghost") == 0 ){
-			mobHealth(selectedMob) = 14; 
-		} else if (mobHealth(selectedMob) > 16 && strcmp(mobType(selectedMob), "Goblin") == 0){
-			mobHealth(selectedMob) = 16; 
+void mobheal(mobAddress *selectedMob){
+	if (*selectedMob != Nil){
+		mobHealth(*selectedMob) += mobActionQuantity(*selectedMob);
+		if (mobHealth(*selectedMob) > 14 && strcmp(mobType(*selectedMob), "Ghost") == 0 ){
+			mobHealth(*selectedMob) = 14; 
+		} else if (mobHealth(*selectedMob) > 16 && strcmp(mobType(*selectedMob), "Goblin") == 0){
+			mobHealth(*selectedMob) = 16; 
 		}
 	}
 }
@@ -187,12 +240,15 @@ void printMobContainer(mobContainer C, int startCol, int startRow) {
     gotoxy(startCol, startRow - 1);
     setColorLightRed();
     printf("=========[Mob Status]=========");
-
+	
+	int i = 0;
     if (current == Nil) {
-        printf("  (Empty)\n");
+    	gotoxy(startCol, startRow + i);
+        printf("(Empty)");
         return;
     }
-	int i = 0;
+
+    
     while (current != Nil) {
     	gotoxy(startCol, startRow + i); i++;
     	setColorBrightWhite();
@@ -227,6 +283,46 @@ void printMobContainer(mobContainer C, int startCol, int startRow) {
 		printf("+----------------------------+\n");
 		i++;
         current = mobNext(current);
+    }
+}
+
+void printCurrentMob(mobContainer C, int startCol, int startRow) {
+    int i = 23;
+    if (currentMob(C)) {
+        gotoxy(startCol, startRow + i); i++;
+        setColorLightRed();
+        printf("=======[Current Mob]=======\n");
+        
+        gotoxy(startCol, startRow + i); i++;
+        setColorDefault();
+        printf("+---------------------------+");
+        
+        gotoxy(startCol, startRow + i); i++;
+        setColorLightRed();
+        printf("  ENEMY	[%s]", mobType(currentMob(C)));
+        
+        gotoxy(startCol, startRow + i); i++;
+        setColorDefault();
+        printf("+---------------------------+");
+        
+        gotoxy(startCol, startRow + i); i++;
+        setColorGreen();
+        printf("  HEALTH	[%d]", mobHealth(currentMob(C)));
+        
+        gotoxy(startCol, startRow + i); i++;
+        setColorDefault();
+        printf("+---------------------------+");
+        
+        gotoxy(startCol, startRow + i); i++;
+        setColorBrightWhite();
+        printf("  NEXT TURN => %s [%d]", mobActionType(currentMob(C)), mobActionQuantity(currentMob(C)));
+        
+        gotoxy(startCol, startRow + i); i++;
+        setColorDefault();
+        printf("+---------------------------+");
+    } else {
+        gotoxy(startCol, startRow + 3);
+        printf("No mob selected.\n");
     }
 }
 

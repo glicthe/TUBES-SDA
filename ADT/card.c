@@ -197,7 +197,7 @@ void printDeck(cardDeck D, int startCol, int startRow) {
     while (temp != Nil) {
         i = 1;
     	gotoxy(startCol, startRow);
-    	if (temp == currentCard(D)) setColorGray();
+    	if (temp == currentCard(D)) setColorLightCyan();
 		else setColorBrightWhite(); 
 		for(i = 0; i < boxTopBot; i++) printf("-");
 		for(i = 1; i <= boxLeftRight; i++) {
@@ -298,8 +298,16 @@ cardAddress popDiscard(discardPile *P) {
     return C;
 }
 
+void initDiscardToInventory(discardPile *P, cardDeck *D){
+	discardPtr temp = topDiscard(*P);
+	while (temp != Nil){
+		cardAddress current = popDiscard(P);
+		addCardToDeck(D, current);
+		temp = topDiscard(*P);
+	}
+}
+
 void printDiscard(discardPile P) {
-    printf("Discard Pile:\n");
     discardPtr temp = topDiscard(P);
     int i = 1;
     while (temp) {

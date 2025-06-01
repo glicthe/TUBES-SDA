@@ -15,7 +15,7 @@ Player createPlayer() {
 }
 
 void printPlayerStatus(Player P, int startCol, int startRow) {
-	int i;
+	int i = 0;
 	gotoxy(startCol, startRow - 1);
     setColorLightCyan();
 	printf("=======[Player Status]=======\n");
@@ -87,32 +87,4 @@ void useEnergy(Player *P, int amount) {
 	}
 }
 
-void playCard(Player *P, cardDeck *Inventory) {
-	cardAddress played = currentCard(P->hand);
-	if (cardCost(played) > P->energy) {
-		return;
-	} else {
-		played = playCurrentCard(&P->hand);
-	
-		if (!played) {
-			printf("No card to play.\n");
-			return;
-		}
-	
-	
-		useEnergy(P, cardCost(played));
-	
-		// Simulasi efek
-		if (strcmp(cardType(played), "Attack") == 0) {
-			printf("Would attack enemy for %d damage\n", cardEffect(played));
-		} else if (strcmp(cardType(played), "Shield") == 0) {
-			P->shield += cardEffect(played);
-			printf("Gained %d shield\n", cardEffect(played));
-		} else if (strcmp(cardType(played), "Draw") == 0) {
-			initDeckInventoryToHand(Inventory, &P->hand);
-			
-		}
-	
-		pushDiscard(&P->discard, played);
-	}
-}
+

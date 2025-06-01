@@ -81,6 +81,7 @@ void initDiscard(discardPile *P);
 void pushDiscard(discardPile *P, cardAddress C);
 cardAddress popDiscard(discardPile *P);
 void printDiscard(discardPile P);
+void initDiscardToInventory(discardPile *P, cardDeck *D);
 
 // Cleanup
 void freeCard(cardAddress C);

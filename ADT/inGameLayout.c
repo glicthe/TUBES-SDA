@@ -12,9 +12,11 @@ void inGame(int startCol, int startRow){
 	starterDeckInventory(&deckInventory);
 	initDeckInventoryToHand(&deckInventory, &P.hand);
 	
-    int selectedIndex = 0;
+    int turnCounter = 0;
     int key;
-    int running = 1;
+	int running = 1;
+	int damage;
+	boolean state;
 
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -29,57 +31,125 @@ void inGame(int startCol, int startRow){
 	int inHandCol = startCol - 45; 
 	int inHandRow = rows - startRow + 1; 
 	
+	
 	while (running) {
-		clearScreen();
-		displayBorder();
-		
-		headBar(startCol, columns, P); 
-		battleScreen(battleScreenCol, battleScreenRow, columns, rows); 
-	    printMobContainer(C, mobStatsCol, mobStatsRow);
-	    printPlayerStatus(P, playerStatsCol, playerStatsRow);
-	    
-	    printDeck(P.hand, inHandCol, inHandRow);
-	    printCurrentCard(P.hand, playerStatsCol, playerStatsRow);
-	    
-		key = getch();
-		switch(key){
-			case 224:
-	            key = getch();
-
-	            switch (key) {
-	                case KEY_LEFT:
-	                    playArrowBeep();
-	                    moveLeft(&P.hand);
-	                    break;
-	                    
-	                case KEY_RIGHT:
-	                    playArrowBeep();
-	                    moveRight(&P.hand);
-	                    break;
-	            }
-	            break;
-            case KEY_ENTER:
-            	playEnterBeep();
-            	playCard(&P, &deckInventory);
-            	break;
-            case 'h':
-            	playEnterBeep();
-            	executeMenuAction(4);
-            	break;
-	    	case 'q':
-	    		playEnterBeep();
-	    		SplashScreen();
-	    		running = 0;
-                break;
-		} 
+		goto PlayerTurn;
+		PlayerTurn:
+			state = true;
+			clearScreen();
+			displayBorder();
+			
+			headBar(startCol, columns, P, turnCounter); 
+			battleScreen(battleScreenCol, battleScreenRow, columns, rows); 
+		    printMobContainer(C, mobStatsCol, mobStatsRow);
+		    printPlayerStatus(P, playerStatsCol, playerStatsRow);
+		    
+		    printDeck(P.hand, inHandCol, inHandRow);
+		    printCurrentCard(P.hand, playerStatsCol, playerStatsRow);
+		    printCurrentMob(C, mobStatsCol, playerStatsRow);
+		    showMobPlayer(C, columns, rows, state);
+		    
+			key = getch();
+			switch(key){
+				case 224:
+		            key = getch();
+	
+		            switch (key) {
+		                case KEY_LEFT:
+		                    playArrowBeep();
+		                    moveLeft(&P.hand);
+		                    break;
+		                    
+		                case KEY_RIGHT:
+		                    playArrowBeep();
+		                    moveRight(&P.hand);
+		                    break;
+		                case KEY_UP:
+		                	playArrowBeep();
+		                	moveRightMob(&C);
+		                	break;
+		                case KEY_DOWN:
+		                	playArrowBeep();
+		                	moveLeftMob(&C);	
+		                	break;
+		            }
+		            break;
+	            case KEY_ENTER:
+	            	playEnterBeep();
+	            	int tempMob = mobHealth(currentMob(C));
+					playCard(&P, &deckInventory, &C);
+	            	if (currentMob(C) != Nil && tempMob > mobHealth(currentMob(C))) {
+	            		state = false;
+						clearScreen();
+						displayBorder();
+						showMobPlayer(C, columns, rows, state);
+						Sleep(500);
+						state = true;
+					}
+					checkMobHealth(&C);
+	            	break;
+	            case 'h':
+	            	playEnterBeep();
+	            	executeMenuAction(4);
+	            	break;
+	            case 'e':
+					turnCounter++; 
+	            	goto MobTurn;
+	            	break;
+		    	case 'q':
+		    		playEnterBeep();
+		    		SplashScreen();
+		    		running = 0;
+		    		goto end;
+	                break;
+			} 
+			if (countMob(C) == 0) goto end;
 	} 
 	
-    
+	MobTurn:
+		clearScreen();
+		mobAddress current = firstMob(C);
+		while (current != Nil) {	
+			clearScreen();
+			displayBorder();
+				
+			headBar(startCol, columns, P, turnCounter);
+			battleScreen(battleScreenCol, battleScreenRow, columns, rows); 
+			printMobContainer(C, mobStatsCol, mobStatsRow);
+			printPlayerStatus(P, playerStatsCol, playerStatsRow);
+			showMobPlayer(C, columns, rows, state);
+			    
+			
+			if (!strcmp(mobActionType(current), "attack")){
+				damage = attack(current);
+				takeDamage(&P, damage);
+			} else {
+				mobheal(&current);
+				P.shield = 0;
+			}
+			
+			current = mobNext(current);
+		    Sleep(1500);
+		}
+	    
+		initDiscardToInventory(&P.discard, &deckInventory);
+		initDeckInventoryToHand(&deckInventory, &P.hand);
+		randAction(C);
+	    turnCounter++;
+	    P.energy = 3;
+		if (countMob(C) != 0) goto PlayerTurn;
+	    else goto end;
+		    
+	end:
+		SplashScreen();
 }
 
-void headBar(int startCol, int max, Player P){
+void headBar(int startCol, int max, Player P, int turnCounter){
 	int i, headBarRow = 3;
 	int headBarCol = 2;;
+	int checkTurn = turnCounter % 2;
+	
+	
 	gotoxy(headBarCol, headBarRow);
 	setColorBrightWhite();
 	for(i = 0; i < max - 4; i++) printf("=");
@@ -110,13 +180,15 @@ void headBar(int startCol, int max, Player P){
     
     gotoxy(startCol + 30, headBarRow + 2);
 	setColorBrightWhite();
-	printf("============");
+	printf("===================");
 	gotoxy(startCol + 31, headBarRow + 3);
 	setColorBrightWhite();
-    printf("WHO'S TURN");
+    if (checkTurn == 0){
+		printf("[%d] PLAYER'S TURN", turnCounter);
+	} else printf(" [%d] MOB'S TURN", turnCounter);
     gotoxy(startCol + 30, headBarRow + 4);
     setColorBrightWhite();
-	printf("============");
+	printf("===================");
     
     gotoxy(startCol + 79, headBarRow + 2);
 	setColorBrightWhite();
@@ -151,6 +223,7 @@ void headBar(int startCol, int max, Player P){
 
 void battleScreen(int startCol, int startRow, int columns, int rows){
 	int i, bottomRow, maxCol;
+	
 	bottomRow = rows - 40;
 	maxCol = columns - 69;
 	gotoxy(startCol, startRow);
@@ -166,3 +239,96 @@ void battleScreen(int startCol, int startRow, int columns, int rows){
 	for(i = 0; i < maxCol; i++) printf("=");
 	setColorDefault;
 }
+
+void showMobPlayer(mobContainer C, int columns, int rows, boolean state){
+	int i, startCol, startRow;
+	startCol = columns - 100;
+	startRow = rows / 3;
+	mobAddress current = firstMob(C);
+	
+	while (current != Nil){
+		i = 1;
+		if (!strcmp(mobType(current), "Goblin")) {
+			setColorLightCyan();
+			gotoxy(startCol, startRow + i); i++;
+			printf("  [%d] ", mobCounter(current));
+			if (!state) setColorRed();
+			else setColorGreen();
+		} else if (!strcmp(mobType(current), "Ghost")) {
+			i = 5;
+			setColorLightCyan();
+			gotoxy(startCol, startRow + i); i++;
+			printf(" [%d] ", mobCounter(current));
+			if (!state) setColorRed();
+			else setColorBrightWhite(); 
+		}
+		if (current == currentMob(C) && state){
+			gotoxy(startCol, startRow);
+			setColorGray();
+		}
+		
+		if (!strcmp(mobType(current), "Goblin")){
+			gotoxy(startCol, startRow + i); i++;
+			printf(" .-^-. ");
+			gotoxy(startCol, startRow + i); i++;
+			printf("( @ @ )");
+			gotoxy(startCol, startRow + i); i++;
+			printf(" \\ V /");
+			gotoxy(startCol, startRow + i); i++;
+			printf(" .='=.");
+			gotoxy(startCol, startRow + i); i++;
+			printf("//\\_/\\\\");
+			gotoxy(startCol, startRow + i); i++;
+			printf("\\)|_|(/");
+			gotoxy(startCol, startRow + i); i++;
+			printf("  /|\\");
+			gotoxy(startCol, startRow + i); i++;
+			printf(" (/ \\)");
+		} else if (!strcmp(mobType(current), "Ghost")) {
+			i = 6;
+			gotoxy(startCol, startRow + i); i++;
+			printf(" .-. ");
+			gotoxy(startCol, startRow + i); i++;
+    		printf("| OO|");
+    		gotoxy(startCol, startRow + i); i++;
+    		printf("|   |");
+    		gotoxy(startCol, startRow + i); i++;
+    		printf("'^^^'");
+		}
+		startCol += 21;
+		current = mobNext(current);
+	}
+	
+}
+
+void playCard(Player *P, cardDeck *Inventory, mobContainer *C) {
+	cardAddress played = currentCard(P->hand);
+	if (cardCost(played) > P->energy) {
+		return;
+	} else {
+		played = playCurrentCard(&P->hand);
+	
+		if (!played) {
+			printf("No card to play.\n");
+			return;
+		}
+	
+	
+		useEnergy(P, cardCost(played));
+	
+		// Simulasi efek
+		if (strcmp(cardType(played), "Attack") == 0) {
+			attacked(cardEffect(played), C);
+		} else if (strcmp(cardType(played), "Shield") == 0) {
+			P->shield += cardEffect(played);
+		} else if (strcmp(cardType(played), "Draw") == 0) {
+			initDeckInventoryToHand(Inventory, &P->hand);
+			
+		}
+		pushDiscard(&P->discard, played);
+	}
+}
+
+
+
+
