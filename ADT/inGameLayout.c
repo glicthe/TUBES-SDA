@@ -10,7 +10,7 @@ void inGame(int startCol, int startRow){
     cardDeck deckInventory;
     initDeck(&deckInventory);
 	starterDeckInventory(&deckInventory);
-	initDeckInventoryToHand(&deckInventory, &P.hand);
+	initDeckInventoryToHand(&deckInventory, &P.hand, 0);
 	
     int turnCounter = 0;
     int key;
@@ -28,7 +28,7 @@ void inGame(int startCol, int startRow){
 	int playerStatsRow = (startRow / 2);
 	int battleScreenCol = startCol - 45; 
 	int battleScreenRow = (startRow / 2) - 2;
-	int inHandCol = startCol - 45; 
+	int inHandCol = startCol - 15; 
 	int inHandRow = rows - startRow + 1; 
 	
 	
@@ -133,7 +133,7 @@ void inGame(int startCol, int startRow){
 		}
 	    
 		initDiscardToInventory(&P.discard, &deckInventory);
-		initDeckInventoryToHand(&deckInventory, &P.hand);
+		initDeckInventoryToHand(&deckInventory, &P.hand, 0);
 		randAction(C);
 	    turnCounter++;
 	    P.energy = 3;
@@ -322,8 +322,7 @@ void playCard(Player *P, cardDeck *Inventory, mobContainer *C) {
 		} else if (strcmp(cardType(played), "Shield") == 0) {
 			P->shield += cardEffect(played);
 		} else if (strcmp(cardType(played), "Draw") == 0) {
-			initDeckInventoryToHand(Inventory, &P->hand);
-			
+			initDeckInventoryToHand(Inventory, &P->hand, cardEffect(played));
 		}
 		pushDiscard(&P->discard, played);
 	}

@@ -60,7 +60,7 @@ typedef struct {
 void initDeck(cardDeck *D);
 cardAddress createCard(const char* name, const char* type, int cost, int value);
 void staterDeckInventory(cardDeck *D);
-void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand);
+void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand, int drawAmount);
 
 // Insert & Navigation
 void addCardToDeck(cardDeck *D, cardAddress C);

@@ -43,21 +43,24 @@ void starterDeckInventory(cardDeck *D){
 	}
 }
 
-void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand) {
-    int i, num, min, max, drawDeck, count = 0;
+void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand, int drawAmount) {
+    int i, num, min, max, drawDeck, count;
+    
+    cardAddress temp = (*hand).current;
     
     int countInv = countDeck(*inventory);
     int countHand = countDeck(*hand);
-    
-	drawDeck = 5 - countHand;
-    if (currentCard(*hand) != Nil && strcmp(cardType(currentCard(*hand)), "Draw") == 0) {
-		drawDeck = 2;
-	}
+    if (drawAmount > 0) {
+        drawDeck = drawAmount;  
+    } else {
+        drawDeck = 5 - countHand;  
+    }
 	
     min = 0;
     max = countInv - 1;
     int *used = (int*)calloc(countInv, sizeof(int));
-    while (count < drawDeck) {
+    count = 0;
+	while (count < drawDeck) {
         num = rand() % (max - min + 1) + min;
         
         if (used[num] == 0) {
@@ -193,6 +196,10 @@ void printDeck(cardDeck D, int startCol, int startRow) {
     cardAddress temp = deckHead(D);
     int boxTopBot = 15;
     int boxLeftRight = 10;
+    
+    if (countDeck(D) > 5){
+    	startCol -= 18;
+	} 
     int i;
     while (temp != Nil) {
         i = 1;
