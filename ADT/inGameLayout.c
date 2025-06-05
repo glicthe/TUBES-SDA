@@ -38,7 +38,7 @@ void inGame(int startCol, int startRow){
 			state = true;
 			clearScreen();
 			displayBorder();
-			
+// 			restScreen(startCol, &P, &deckInventory);
 			headBar(startCol, columns, P, turnCounter); 
 			battleScreen(battleScreenCol, battleScreenRow, columns, rows); 
 		    printMobContainer(C, mobStatsCol, mobStatsRow);
@@ -102,6 +102,9 @@ void inGame(int startCol, int startRow){
 		    		running = 0;
 		    		goto end;
 	                break;
+	            case 'm':				//Untuk akses merchant sementara
+	            	merchantScreen(startCol, startRow, &P, &deckInventory);
+	            	break;
 			} 
 			if (countMob(C) == 0) goto end;
 	} 
@@ -328,6 +331,244 @@ void playCard(Player *P, cardDeck *Inventory, mobContainer *C) {
 	}
 }
 
+// Merchant
+void merchantScreen(int startCol, int startRow, Player *player, cardDeck *inventory) {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int columns = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2;
+	int rows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2;
+	
+    // Array 2x5 merchant card
+    cardAddress merchantCards[2][5];
+    int prices[2][5];
+    int row, column;
 
+    // Generate cards and their prices
+    for (row = 0; row < 2; row++) {
+        for (column = 0; column < 5; column++) {
+            merchantCards[row][column] = generateRandomCard();
+            prices[row][column] = 20 + randNumGenerator();
+        }
+    }
+
+    int currentRow = 0, currentCol = 0;
+    int exitMerchant = 0;
+
+    while (!exitMerchant) {
+    	clearScreen();
+    	displayBorder();
+    	printMerchant(startCol * 2 * 1.2, startRow);
+        printf("Gold: %d\n\n", player->gold);
+
+		// Display card
+	    int gap = 19;
+	    for (row = 0; row < 2; row++) {
+	        for (column = 0; column < 5; column++) {
+	        	printCard((columns - 55) + 22 * column, (rows - 13) + 15 * row, merchantCards[row][column]);
+	        }
+	    }
+
+        // Display navigation
+        for (row = 0; row < 2; row++) {
+            for (column = 0; column < 5; column++) {
+                if (row == currentRow && column == currentCol) {
+                    // Position
+                    printHand((columns - 55) + 22 * column, (rows - 29) + 15 * row);
+                    setColorBlue(); printCard((columns - 55) + 22 * column, (rows - 13) + 15 * row, merchantCards[row][column]); setColorWhite();
+                    gotoxy(columns - 10, rows + 16);
+		        	if (merchantCards[row][column] != Nil) {
+						printf("%-12s (%s) - %d [%d gold]\n",
+	                    		cardName(merchantCards[row][column]),
+	                    		cardType(merchantCards[row][column]),
+	                    		cardCost(merchantCards[row][column]),
+	                    		prices[row][column]
+						);
+					} else {
+						printf("Sold");
+					}
+				}
+            }
+        }
+        gotoxy(columns - 10, rows + 18);
+        printf("\nUse arrow keys to move, ENTER to buy, ESC to exit.\n");
+
+        int ch = getch();
+        if (ch == 224) {
+            ch = getch();
+            switch (ch) {
+                case KEY_UP:
+                    currentRow = (currentRow == 0) ? 1 : 0;
+                    break;
+                case KEY_DOWN:
+                    currentRow = (currentRow == 1) ? 0 : 1;
+                    break;
+                case KEY_LEFT:
+                    currentCol = (currentCol == 0) ? 4 : currentCol - 1;
+                    break;
+                case KEY_RIGHT:
+                    currentCol = (currentCol == 4) ? 0 : currentCol + 1;
+                    break;
+            }
+        } else if (ch == KEY_ENTER) {
+        	cardAddress selected = merchantCards[currentRow][currentCol];
+        	if (selected != Nil) {
+	            int price = prices[currentRow][currentCol];
+	            if (player->gold >= price) {
+	                addCardToDeck(inventory, selected);
+	                player->gold -= price;
+	                printf("\nYou bought %s!\n", cardName(selected));
+			        merchantCards[currentRow][currentCol] = Nil;
+	            } else {
+	                printf("\nNot enough gold!\n");
+	                getch();
+	            }
+            } else {
+        	    gotoxy(columns - 2, rows + 16);
+				setColorRed(); printf("You have bought it ALREADY!");  setColorWhite();
+			}
+        } else if (ch == KEY_ESC) {
+            exitMerchant = 1;
+            // Generate cards and their prices
+		    for (row = 0; row < 2; row++) {
+		        for (column = 0; column < 5; column++) {
+		            freeCard(merchantCards[row][column]);
+        		}
+    		}
+    		
+        }
+    }
+}
+
+cardAddress generateRandomCard() {
+    int roll = rand() % 3;
+    switch (roll) {
+        case 0:
+            return createCard("PowerSlash", "Attack", 2, 8);
+        case 1:
+            return createCard("IronWall", "Shield", 2, 10);
+        case 2:
+            return createCard("Insight", "Draw", 1, 2);
+        default:
+            return createCard("Strike", "Attack", 1, 6);
+    }
+}
+
+void printMerchant(int startCol, int startRow){
+	int i = 1;
+	gotoxy(startCol, startRow + i); i++; printf("            %s+++++##               ", BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("          +%s-+%s----%s+###             ", RED, RESET, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("          +%s++%s-----%s+###            ", RED, RESET, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("           +%s-----%s++%s#####          ", RESET, CYAN, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("           #+++++###              ");
+	gotoxy(startCol, startRow + i); i++; printf("          #+###++##               ");
+	gotoxy(startCol, startRow + i); i++; printf("         ++############           ");
+	gotoxy(startCol, startRow + i); i++; printf("         ++++###++##++#           ");
+	gotoxy(startCol, startRow + i); i++; printf("         +++++####++++##          ");
+	gotoxy(startCol, startRow + i); i++; printf("         ####+++#+++#####         ");
+	gotoxy(startCol, startRow + i); i++; printf("     %s++++%s######%s+++%s#########       ", CYAN, BLUE, CYAN, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("     %s+++++%s###########%s++++%s###      ", CYAN, BLUE, CYAN, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("    %s+++++-++%s########%s++++++%s###     ", CYAN, BLUE, CYAN, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("   #%s+++%s#%s++---++%s#####%s++-++%s#######  ", CYAN, BLUE, CYAN, BLUE, CYAN, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("##############%s++++%s################", CYAN, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("  #############%s++%s##########       ", CYAN, BLUE);
+	gotoxy(startCol, startRow + i); i++; printf("          ##%sMERCHANT%s## %s           ", RESET, BLUE, RESET);
+}
+
+void printHand(int startCol, int startRow){
+	gotoxy(startCol, startRow++); printf(" %s.@<=)[{{}{}{]}}]@@=]-. ", BLUE);
+	gotoxy(startCol, startRow++); printf(" .@-)~............)(@-. ");
+	gotoxy(startCol, startRow++); printf(" .@@....:-:.-~~..*>-@.. ");
+	gotoxy(startCol, startRow++); printf(" .:@-.......::~~~-=..@. ");
+	gotoxy(startCol, startRow++); printf(" ...(@@<...>@@@@@@@..@. ");
+	gotoxy(startCol, startRow++); printf(" %s.+@@@@@@@@@@@@@@@@@.@. ", CYAN);
+	gotoxy(startCol, startRow++); printf(" .@@@###@@@@{#####(@.@. ");
+	gotoxy(startCol, startRow++); printf(" .@@...::=.*.@@@@##@@.. ");
+	gotoxy(startCol, startRow++); printf(" .{@@#######@@@@@@#@@.. ");
+	gotoxy(startCol, startRow++); printf(" ..@@@@@-###@@##@@#@@{. ");
+	gotoxy(startCol, startRow++); printf(" ...@@@@@@##@@@@#.@@@@. ");
+	gotoxy(startCol, startRow++); printf(" ......@@@@@@@}..@@~... ");
+	gotoxy(startCol, startRow++); printf(" ........{@@@..-@@..... ");
+	gotoxy(startCol, startRow++); printf(" .........[@@.......... ");
+	gotoxy(startCol, startRow++); printf(" .........(@@.......... ");
+	gotoxy(startCol, startRow++); printf(" .........[@*..........%s ", RESET);
+}
+
+void printCard(int startCol, int startRow, Card *shopCard){
+	int length;
+	gotoxy(startCol, startRow++); printf(" .==================. ");
+	for (length = 0; length < 10; length++) {
+		gotoxy(startCol, startRow++); printf(" .||              ||. ");
+	}
+	gotoxy(startCol, startRow++); printf(" .==================. ");
+}
+
+//Rest Area
+void restScreen(int startCol, Player *player, cardDeck *deck) {
+    gotoxy(startCol, 2); printf("=== Rest Site ===\n");
+    gotoxy(startCol, 21); printf("HP: %d/%d\n", player->health, MAX_PLAYER_HEALTH);
+    gotoxy(startCol, 22); printf("1. Rest (Recover 30% lost HP)\n");
+    gotoxy(startCol, 23); printf("2. Smith (Upgrade a card)\n");
+    gotoxy(startCol, 26); printf("Choose: ");	
+	
+	//Selection
+    int choice;
+    scanf("%d", &choice);
+
+    if (choice == 1) {
+        int heal = (MAX_PLAYER_HEALTH - player->health) * 0.3;  //heal berdasarkan 30% hp yang hilang
+        player->health += heal;
+        if (player->health > MAX_PLAYER_HEALTH) {
+            player->health = MAX_PLAYER_HEALTH;
+        }
+        gotoxy(startCol, 31); printf("You rest and recover %d lost HP.\n", heal);
+    } else if (choice == 2) {
+        gotoxy(startCol, 32); printf("Available cards to upgrade:\n");
+        printDeck(player->hand, 10, 20); 
+        gotoxy(startCol, 33); printf("Choose card index to upgrade: ");
+        int index;
+        scanf("%d", &index);
+//      upgradeCard(deck, index);
+    } else {
+        printf("Invalid choice.\n");
+    }
+}
+
+void campFire() {
+	int startCol = 0;
+    gotoxy(startCol, 33); printf("                                                             ");
+    gotoxy(startCol, 33); printf("                          =@@                                ");
+    gotoxy(startCol, 33); printf("                         @@@%%                               ");
+    gotoxy(startCol, 33); printf("                         @@*%@  @@                           ");
+    gotoxy(startCol, 33); printf("                          -@*@.+@@@                          ");
+    gotoxy(startCol, 33); printf("                           =@+#@*+@@                         ");
+    gotoxy(startCol, 33); printf("                        *  %@-=+=-*@     ..                  ");
+    gotoxy(startCol, 33); printf("                      @@@@ %@=%%:.*@@    @@                  ");
+    gotoxy(startCol, 33); printf("                     =@@#  =@ :# =*@@   %%@@@                ");
+    gotoxy(startCol, 33); printf("                    @@**# #@*+ : +*@@  *@*@@                 ");
+    gotoxy(startCol, 33); printf("                    +@.*@..@= :=.##@* +@*+@@                 ");
+    gotoxy(startCol, 33); printf("                    @@+-*@@*.-+=:.-*@-:@-@=                  ");
+    gotoxy(startCol, 33); printf("                     :@*#*= =:.*= =%%###**@                  ");
+    gotoxy(startCol, 33); printf("                      @*.-%%.+  **:%%:@=:@@                  ");
+    gotoxy(startCol, 33); printf("                @@@@  :@: .=.  :*=:. #= @@                   ");
+    gotoxy(startCol, 33); printf("                +@*@@ +@#:**%%+  :%%%#  =@- @@@              ");
+    gotoxy(startCol, 33); printf("                -@:#=:@*.#. %% -    ==   ##@@*@=             ");
+    gotoxy(startCol, 33); printf("               :@#:.###..  .%%+.. :   -*.=#*-*@@             ");
+    gotoxy(startCol, 33); printf("              %%@#+  *%%::  *@* :: .=.+%%+- #- +%%:          ");
+    gotoxy(startCol, 33); printf("             .@#-.-=-=#*  .  ::     =%%++=#=+%%#@@           ");
+    gotoxy(startCol, 33); printf("            -@*%%*:..*+:  .---.::. .: -%%. : -#=@@           ");
+    gotoxy(startCol, 33); printf("            %%@== +. +%%+  .-::.  :==.  +*  :-+#+@@          ");
+    gotoxy(startCol, 33); printf("            #@-= +: .%%%% .  -:   --. .:.   -:=*@%%          ");
+    gotoxy(startCol, 33); printf("            #@*#= :   .-=:         -+=.   :.-*@@             ");
+    gotoxy(startCol, 33); printf("              @***:-   .=-+-    :*+-:.    ..*@               ");
+    gotoxy(startCol, 33); printf("   @@@@@@@@@@@@@@*-   .                 .=*@@@@@@@@@@@@@@    ");
+    gotoxy(startCol, 33); printf(" @@    +        -@@@%%    .          .  %%@@@-        =  @@  ");
+    gotoxy(startCol, 33); printf(" #@ =*  %%+*@@@@@*.  +@#  :@@@@@@@@*  #@*   *@@@@@*+#  *= @@ ");
+    gotoxy(startCol, 33); printf(" @@ .   *@@    #+=++##*@@@%%+=:::-#@@@###+===#:   @@*   . @@ ");
+    gotoxy(startCol, 33); printf("   @@@@@@@      #@%%#@@@@=@@@@@@@%%*@@@@*%%@%%      %%@@@@@@ ");
+    gotoxy(startCol, 33); printf("        =@   .%%#  %%@* .@+        +@* :@@%%  #%%:   @@      ");
+    gotoxy(startCol, 33); printf("         *@*     .@@   @@  -##*=.- %%@   #@-     +@@         ");
+    gotoxy(startCol, 33); printf("           %%@@@@@@     @@   :  =  .@@     @@@@@@@           ");
+    gotoxy(startCol, 33); printf("                         @@+###*@@@                          ");
+}
 
 

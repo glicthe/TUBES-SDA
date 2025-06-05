@@ -3,7 +3,6 @@
 
 #include "mob.h"
 #include "boss.h"
-#include "turn.h"
 #include "player.h"
 
 // Fungsi untuk menampilkan elemen UI

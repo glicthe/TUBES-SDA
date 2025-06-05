@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <string.h>
 #include <conio.h>
+#include <stdint.h>
 
 #define true 1
 #define false 0
@@ -42,6 +43,12 @@
 #define COLOR_LIGHT_MAGENTA 13
 #define COLOR_LIGHT_YELLOW 14
 #define COLOR_BRIGHT_WHITE 15
+
+// Menyisipkan pewarnaan karakter dengan ANSI
+#define RESET "\033[0m"
+#define RED "\033[0;31;40m"
+#define BLUE "\033[0;34;40m"
+#define CYAN "\033[0;36;40m"
 
 // Fungsi utility
 HANDLE Out();

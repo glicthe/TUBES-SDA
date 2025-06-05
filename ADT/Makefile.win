@@ -1,17 +1,17 @@
 # Project: BloodSpire
 # Makefile created by Dev-C++ 5.11
 
-CPP      = g++.exe -D__DEBUG__
-CC       = gcc.exe -D__DEBUG__
+CPP      = g++.exe
+CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = boss.o card.o layout.o main.o map.o menu.o mob.o player.o config.o display.o Untitled1.o
-LINKOBJ  = boss.o card.o layout.o main.o map.o menu.o mob.o player.o config.o display.o Untitled1.o
-LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -g3
+OBJ      = main.o config.o mob.o boss.o menu.o display.o inGameLayout.o card.o player.o ../../docs/TUBES-SDA/ADT/map.o
+LINKOBJ  = main.o config.o mob.o boss.o menu.o display.o inGameLayout.o card.o player.o ../../docs/TUBES-SDA/ADT/map.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
 BIN      = BloodSpire.exe
-CXXFLAGS = $(CXXINCS) -g3
-CFLAGS   = $(INCS) -g3
+CXXFLAGS = $(CXXINCS) 
+CFLAGS   = $(INCS) 
 RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -24,35 +24,32 @@ clean: clean-custom
 $(BIN): $(OBJ)
 	$(CC) $(LINKOBJ) -o $(BIN) $(LIBS)
 
-boss.o: boss.c
-	$(CC) -c boss.c -o boss.o $(CFLAGS)
-
-card.o: card.c
-	$(CC) -c card.c -o card.o $(CFLAGS)
-
-layout.o: layout.c
-	$(CC) -c layout.c -o layout.o $(CFLAGS)
-
 main.o: main.c
 	$(CC) -c main.c -o main.o $(CFLAGS)
-
-map.o: map.c
-	$(CC) -c map.c -o map.o $(CFLAGS)
-
-menu.o: menu.c
-	$(CC) -c menu.c -o menu.o $(CFLAGS)
-
-mob.o: mob.c
-	$(CC) -c mob.c -o mob.o $(CFLAGS)
-
-player.o: player.c
-	$(CC) -c player.c -o player.o $(CFLAGS)
 
 config.o: config.c
 	$(CC) -c config.c -o config.o $(CFLAGS)
 
+mob.o: mob.c
+	$(CC) -c mob.c -o mob.o $(CFLAGS)
+
+boss.o: boss.c
+	$(CC) -c boss.c -o boss.o $(CFLAGS)
+
+menu.o: menu.c
+	$(CC) -c menu.c -o menu.o $(CFLAGS)
+
 display.o: display.c
 	$(CC) -c display.c -o display.o $(CFLAGS)
 
-Untitled1.o: Untitled1.c
-	$(CC) -c Untitled1.c -o Untitled1.o $(CFLAGS)
+inGameLayout.o: inGameLayout.c
+	$(CC) -c inGameLayout.c -o inGameLayout.o $(CFLAGS)
+
+card.o: card.c
+	$(CC) -c card.c -o card.o $(CFLAGS)
+
+player.o: player.c
+	$(CC) -c player.c -o player.o $(CFLAGS)
+
+../../docs/TUBES-SDA/ADT/map.o: ../../docs/TUBES-SDA/ADT/map.c
+	$(CC) -c ../../docs/TUBES-SDA/ADT/map.c -o ../../docs/TUBES-SDA/ADT/map.o $(CFLAGS)

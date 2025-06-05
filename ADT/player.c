@@ -6,7 +6,7 @@ Player createPlayer() {
 	P.health = MAX_PLAYER_HEALTH;
 	P.energy = MAX_PLAYER_ENERGY;
 	P.shield = 0;
-	P.gold = 10;
+	P.gold = 90;
 
 	initDeck(&P.hand);
 	initDiscard(&P.discard);
