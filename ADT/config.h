@@ -6,7 +6,7 @@
 #include <windows.h>
 #include <string.h>
 #include <conio.h>
-#include <stdint.h>
+#include <stdbool.h>
 
 #define true 1
 #define false 0
@@ -49,6 +49,9 @@
 #define RED "\033[0;31;40m"
 #define BLUE "\033[0;34;40m"
 #define CYAN "\033[0;36;40m"
+#define ORANGE "\033[38;5;208m"
+#define BROWN "\033[38;2;138;120;78m"
+#define YELLOW "\033[33m"
 
 // Fungsi utility
 HANDLE Out();
