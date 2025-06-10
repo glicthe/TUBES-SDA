@@ -87,4 +87,25 @@ void useEnergy(Player *P, int amount) {
 	}
 }
 
-
+void printPlayerSprite(int startCol, int startRows){
+	startCol += 36; startRows += 4;
+    gotoxy(startCol, startRows++); printf("                             ______        ");
+    gotoxy(startCol, startRows++); printf("                            /      \\    ");
+    gotoxy(startCol, startRows++); printf("                 _________  \\  |\\/\\ \\    ");
+    gotoxy(startCol, startRows++); printf("                /__/_____ \\__\\_\\   \\|    ");
+    gotoxy(startCol, startRows++); printf("              ___________\\/ \\/  ___//    ");
+    gotoxy(startCol, startRows++); printf("             /__/_____/  /\\  \\_/_\\        ");
+    gotoxy(startCol, startRows++); printf("                _/    |    _ _/            ");
+    gotoxy(startCol, startRows++); printf("               /_   / \\_____/            ");
+    gotoxy(startCol, startRows++); printf("              /\\/\\  |     /                ");
+    gotoxy(startCol, startRows++); printf("            _/\\//|  /    /                ");
+    gotoxy(startCol, startRows++); printf("           /\\__/\\/_/    /                ");
+    gotoxy(startCol, startRows++); printf("          |/\\\\         /                ");
+    gotoxy(startCol, startRows++); printf("          /\\//\\        \\                ");
+    gotoxy(startCol, startRows++); printf("       __///__/\\_______/                ");
+    gotoxy(startCol, startRows++); printf("      | ///_\\__/   \\ \\                    ");
+    gotoxy(startCol, startRows++); printf("      |///          \\ \\                    ");
+    gotoxy(startCol, startRows++); printf("      ///            /_/                ");
+    gotoxy(startCol, startRows++); printf("     |//            /_/_                ");
+    gotoxy(startCol, startRows++); printf("     \\/            |____\\            ");
+}

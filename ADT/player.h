@@ -21,6 +21,8 @@ typedef struct Player {
 
 // Init
 Player createPlayer();
+void printPlayerSprite(int startCol, int startRows);
+
 
 // Status
 void printPlayerStatus(Player P, int startCol, int startRow);
