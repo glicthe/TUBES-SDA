@@ -13,6 +13,7 @@ typedef struct Card {
     char* type;         // "Attack", "Skill", etc.
     int cost;           // Energy cost
     int effectValue;    // e.g. damage or block
+    bool upgrade;		// For enhancing the card effect
     cardAddress prev;
     cardAddress next;
 } Card;
@@ -21,8 +22,10 @@ typedef struct Card {
 #define cardType(P) (P)->type
 #define cardCost(P) (P)->cost
 #define cardEffect(P) (P)->effectValue
+#define cardUpgrade(P) (P)->upgrade
 #define cardPrev(P) (P)->prev
 #define cardNext(P) (P)->next
+
 
 // ==========================
 // Deck as Doubly Linked List
@@ -82,6 +85,8 @@ void pushDiscard(discardPile *P, cardAddress C);
 cardAddress popDiscard(discardPile *P);
 void printDiscard(discardPile P);
 void initDiscardToInventory(discardPile *P, cardDeck *D);
+void printDiscardIcon();
+void printDrawIcon();
 
 // Cleanup
 void freeCard(cardAddress C);

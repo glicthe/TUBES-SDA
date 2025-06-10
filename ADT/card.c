@@ -17,6 +17,7 @@ cardAddress createCard(const char* name, const char* type, int cost, int value) 
     cardType(C) = strdup(type);
     cardCost(C) = cost;
     cardEffect(C) = value;
+    cardUpgrade(C) = false;
     cardPrev(C) = NULL;
     cardNext(C) = NULL;
 
@@ -321,4 +322,46 @@ void printDiscard(discardPile P) {
         printf("  %d: %s (%s)\n", i++, cardName(temp->card), cardType(temp->card));
         temp = temp->next;
     }
+}
+
+
+
+void printDrawIcon() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = 3;
+	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 17;
+	gotoxy(startCol, startRows++); printf("%s                .:==.          ", RESET);
+	gotoxy(startCol, startRows++); printf("        :++++-.  .. =-         ");
+	gotoxy(startCol, startRows++); printf("   :==:..-=:...  ---.=-        ");
+	gotoxy(startCol, startRows++); printf("-=-.:-=.   -####:    :.=:      ");
+	gotoxy(startCol, startRows++); printf("+==-.-..   .*####-.   : +      ");
+	gotoxy(startCol, startRows++); printf("==--..-     .#####:    :.+     ");    
+	gotoxy(startCol, startRows++); printf("  +==-.-.     +#####:   ..:+   ");
+	gotoxy(startCol, startRows++); printf("  :+-=: :.    .######.   .:=-  ");
+	gotoxy(startCol, startRows++); printf("    +===..+.    :###*:. .=:..+ ");
+	gotoxy(startCol, startRows++); printf("     =-==..:+-...:-::...=*##*- ");
+	gotoxy(startCol, startRows++); printf("      -+-=-=*##########*+=-    ");
+	gotoxy(startCol, startRows++); printf("       -=-+######*+++.         ");
+	gotoxy(startCol, startRows++); printf("        ++*+++-                ");
+} 
+
+void printDiscardIcon() { // Size (32 , 14)
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) - 38;
+	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 17;
+	gotoxy(startCol, startRows++); printf("%s           -++=:               ", RESET);
+	gotoxy(startCol, startRows++); printf("         *+=====+*****-        ");
+	gotoxy(startCol, startRows++); printf("        +++=---=#####*==+*+=   ");
+	gotoxy(startCol, startRows++); printf("      ++=*---==**=------==+=##-");
+	gotoxy(startCol, startRows++); printf("    -*=*--=@@@@@@@@@#+=-#=####=");
+	gotoxy(startCol, startRows++); printf("   .*++=--=@@#+=*#@@@##+=*###+ ");
+	gotoxy(startCol, startRows++); printf("  ++*=-=------==#=#@@@++###*:  ");
+	gotoxy(startCol, startRows++); printf(" =*+##==-----====*#@@#=####=   ");
+	gotoxy(startCol, startRows++); printf(".*==#@@#####@@@#@#+=#=####+    ");   
+	gotoxy(startCol, startRows++); printf(" :##########*+==+**=*###*:     ");
+	gotoxy(startCol, startRows++); printf("   .+**################*-      ");
+	gotoxy(startCol, startRows++); printf("         =***#########*=       ");
+	gotoxy(startCol, startRows++); printf("              .-+***##=        ");
 }
