@@ -1,3 +1,5 @@
+#include <windows.h>
+#include <stdio.h>
 #include "config.h"
 
 HANDLE Out()
@@ -66,6 +68,13 @@ void hideCursor() {
     SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
 }
 
+void showCursor(void) {
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+    cursorInfo.bVisible = TRUE;
+    SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &cursorInfo);
+}
+
 int randNumGenerator(){
 	int min = 1, max = 10;
 	
@@ -73,10 +82,32 @@ int randNumGenerator(){
 	return value;
 }
 
+int generateRandomRange(int min, int max) {
+    if (min > max) {
+        int temp = min;
+        min = max;
+        max = temp;
+    }
+    int value = rand() % (max - min + 1) + min;
+    return value;
+}
+
+void playArrowBeep() {
+    Beep(BEEP_ARROW_FREQ, BEEP_ARROW_DURATION);
+}
+
+void playEnterBeep() {
+    Beep(BEEP_ENTER_FREQ, BEEP_ENTER_DURATION);
+}
+
+// Implementasi fungsi-fungsi warna
 void setTextColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
-// Implementasi fungsi-fungsi warna
+void setColorDefault() {
+    setTextColor(COLOR_WHITE);
+}
+
 void setColorRed() {
     setTextColor(COLOR_RED);
 }
@@ -137,20 +168,11 @@ void setColorBrightWhite() {
     setTextColor(COLOR_BRIGHT_WHITE);
 }
 
-void setColorDefault() {
-    setTextColor(COLOR_WHITE);
-}
-
 void setColorHighlight() {
     setTextColor(112); // Background putih, teks hitam
 }
 
-void playArrowBeep() {
-    Beep(BEEP_ARROW_FREQ, BEEP_ARROW_DURATION);
+void setColorHighlight_Map() {
+    setTextColor(78); // Background putih, teks hitam
 }
-
-void playEnterBeep() {
-    Beep(BEEP_ENTER_FREQ, BEEP_ENTER_DURATION);
-}
-
 
