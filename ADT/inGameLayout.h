@@ -12,14 +12,20 @@ void showMobPlayer(mobContainer C, int columns, int rows, boolean state);
 void playCard(Player *P, cardDeck *Inventory, mobContainer *C);
 
 // Merchant
-void merchantScreen(int startCol, int startRow, Player *player, cardDeck *inventory);
+void merchantScreen(Player *player, cardDeck *inventory);
 cardAddress generateRandomCard();
-void printMerchant(int startCol, int startRow);
-void printHand(int startCol, int startRow);
-void printCard(int startCol, int startRow, Card *shopCard);
+void printMerchant();
+void skipLabel(const char* name);
+void printHand(int Column, int row);
+void printCard(int column, int row, Card *shopCard);
 
 // Rest
-void restScreen(int startCol, Player *player, cardDeck *deck);
+void restScreen(Player *player, cardDeck *deck);
 void campFire();
+void proceedLabel();
+void printRest();
+void printSmith();
+void highlightLeft();
+void highlightRight();
 
 #endif 
