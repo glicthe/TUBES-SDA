@@ -3,13 +3,13 @@
 
 #include "display.h"
 
-void inGame(int startCol, int startRow);
+void inGame(int startCol, int startRow, int battle, int depth);
 void headBar(int startCol, int max, Player P, int turnCounter);
-void battleScreen(int startCol, int startRow, int colunmns, int rows);
-void showMobPlayer(mobContainer C, int columns, int rows, boolean state);
+void battleScreen(int startCol, int startRow, int colunmns, int rows, char* state);
+void showMobPlayer(Boss* boss, mobContainer C, int columns, int rows, boolean state);
 
 // Play
-void playCard(Player *P, cardDeck *Inventory, mobContainer *C);
+void playCard(Player *P, cardDeck *Inventory, mobContainer *C, Boss* boss);
 
 // Merchant
 void merchantScreen(Player *player, cardDeck *inventory);

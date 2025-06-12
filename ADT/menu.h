@@ -3,6 +3,8 @@
 
 #include "display.h"
 #include "inGameLayout.h"
+#include "map_display.h"
+#include "map_navigation.h"
 
 
 // Struktur untuk item menu
@@ -15,5 +17,7 @@ typedef struct {
 void displayMenu(MenuItem menu[], int menuSize, int selectedIndex);
 void executeMenuAction(int menuId);
 void SplashScreen();
+void howToPlay();
+void startGame();
 
 #endif

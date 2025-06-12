@@ -13,8 +13,8 @@ typedef struct Card {
     char* type;         // "Attack", "Skill", etc.
     int cost;           // Energy cost
     int effectValue;    // e.g. damage or block
-    bool upgrade;		// For enhancing the card effect
-    cardAddress prev;
+    bool upgrade;
+	cardAddress prev;
     cardAddress next;
 } Card;
 
@@ -25,7 +25,6 @@ typedef struct Card {
 #define cardUpgrade(P) (P)->upgrade
 #define cardPrev(P) (P)->prev
 #define cardNext(P) (P)->next
-
 
 // ==========================
 // Deck as Doubly Linked List
@@ -62,7 +61,7 @@ typedef struct {
 // Create
 void initDeck(cardDeck *D);
 cardAddress createCard(const char* name, const char* type, int cost, int value);
-void staterDeckInventory(cardDeck *D);
+void starterDeckInventory(cardDeck *D);
 void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand, int drawAmount);
 
 // Insert & Navigation

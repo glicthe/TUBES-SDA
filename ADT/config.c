@@ -1,5 +1,3 @@
-#include <windows.h>
-#include <stdio.h>
 #include "config.h"
 
 HANDLE Out()
@@ -16,50 +14,11 @@ void gotoxy(int x, int y)
 }
 
 void clearScreen() {
-    system("cls");
+    //system("cls");
+    printf("\033[H\033[J");
+    fflush(stdout);
 }
 
-HWND WINAPI GetConsoleWindowNT(void)
-{
-    //declare function pointer type
-    typedef HWND WINAPI(*GetConsoleWindowT)(void);
-    //declare one such function pointer
-    GetConsoleWindowT GetConsoleWindow;
-    //get a handle on kernel32.dll
-    HMODULE hk32Lib = GetModuleHandle(TEXT("KERNEL32.DLL"));
-    //assign procedure address to function pointer
-    GetConsoleWindow = (GetConsoleWindowT)GetProcAddress(hk32Lib
-    ,TEXT("GetConsoleWindow"));
-    //check if the function pointer is valid
-    //since the function is undocumented
-    if(GetConsoleWindow == NULL){
-        return NULL;
-    }
-    //call the undocumented function
-    return GetConsoleWindow();
-}
-
-void SetConsoleSettings() {
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hOut == INVALID_HANDLE_VALUE) return;
-    // Step 3: Resize font
-    CONSOLE_FONT_INFOEX fontInfo = {0};
-    fontInfo.cbSize = sizeof(CONSOLE_FONT_INFOEX);
-    fontInfo.dwFontSize.X = 4;  // Smaller font
-    fontInfo.dwFontSize.Y = 7;
-    fontInfo.FontFamily = FF_DONTCARE;
-    fontInfo.FontWeight = FW_NORMAL;
-    SetCurrentConsoleFontEx(hOut, FALSE, &fontInfo);
-
-
-    Sleep(1000);  // Let font update propagate
-
-    // Step 2: Resize buffer
-    COORD bufferSize = {229, 75};
-    SetConsoleScreenBufferSize(hOut, bufferSize);
-
-    Sleep(1000);  // Let font update propagate
-}
 
 void hideCursor() {
     CONSOLE_CURSOR_INFO cursorInfo;
@@ -92,22 +51,10 @@ int generateRandomRange(int min, int max) {
     return value;
 }
 
-void playArrowBeep() {
-    Beep(BEEP_ARROW_FREQ, BEEP_ARROW_DURATION);
-}
-
-void playEnterBeep() {
-    Beep(BEEP_ENTER_FREQ, BEEP_ENTER_DURATION);
-}
-
-// Implementasi fungsi-fungsi warna
 void setTextColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }
-void setColorDefault() {
-    setTextColor(COLOR_WHITE);
-}
-
+// Implementasi fungsi-fungsi warna
 void setColorRed() {
     setTextColor(COLOR_RED);
 }
@@ -168,6 +115,10 @@ void setColorBrightWhite() {
     setTextColor(COLOR_BRIGHT_WHITE);
 }
 
+void setColorDefault() {
+    setTextColor(COLOR_WHITE);
+}
+
 void setColorHighlight() {
     setTextColor(112); // Background putih, teks hitam
 }
@@ -176,3 +127,10 @@ void setColorHighlight_Map() {
     setTextColor(78); // Background putih, teks hitam
 }
 
+void playArrowBeep() {
+    Beep(BEEP_ARROW_FREQ, BEEP_ARROW_DURATION);
+}
+
+void playEnterBeep() {
+    Beep(BEEP_ENTER_FREQ, BEEP_ENTER_DURATION);
+}

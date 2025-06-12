@@ -1,54 +1,86 @@
 #include "inGameLayout.h"
 
-void inGame(int startCol, int startRow){
+void inGame(int startCol, int startRow, int type, int depth){
 	// initiate
-	setColorDefault;
-    Player P = createPlayer();
-    mobContainer C;
-	createMobContainer(&C);
-    randGenerateMob(&C);
-    cardDeck deckInventory;
-    initDeck(&deckInventory);
-	starterDeckInventory(&deckInventory);
+	static mobContainer C;
+	static Player P;
+	static Boss* boss;
+    static cardDeck deckInventory;
+	if (depth == 1) {
+    	P = createPlayer();
+    	boss = Nil;
+		createMobContainer(&C);
+    	initDeck(&deckInventory);
+		starterDeckInventory(&deckInventory);
+	}
+	
+	if (type == 1) {
+    	randGenerateMob(&C);
+	} else if (type == 2) {
+		boss = createRandSecondaryBoss(boss);
+	} else if (type == 3) {
+		patternQueue dragoon;
+		boss = createBoss("dragoon", 80, &dragoon);
+	} else if (type == 4) {
+		merchantScreen(&P, &deckInventory);
+		return;
+	} else if (type == 5) {
+		restScreen(&P, &deckInventory);
+		return;
+	}
+    
+    initDiscardToInventory(&P.discard, &deckInventory);
 	initDeckInventoryToHand(&deckInventory, &P.hand, 0);
 	
+	P.energy = 3;
     int turnCounter = 0;
-    int key;
 	int running = 1;
-	int damage;
+	int tempMob, damage, key;
 	boolean state;
-
+	char* playerState;
+	int prevBossHealth;
+	
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
 	int rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 	int mobStatsCol = startCol + 117;
-	int mobStatsRow = (startRow / 2);
-	int playerStatsCol = startCol - 76;
-	int playerStatsRow = (startRow / 2);
-	int battleScreenCol = startCol - 45; 
+	int mobStatsRow = (startRow / 2) - 2;
+	int playerStatsCol = startCol - 77;
+	int playerStatsRow = (startRow / 2) - 2;
+	int battleScreenCol = startCol - 46; 
 	int battleScreenRow = (startRow / 2) - 2;
 	int inHandCol = startCol - 15; 
-	int inHandRow = rows - startRow + 1; 
+	int inHandRow = rows - startRow + 2; 
 	
 	
 	while (running) {
 		goto PlayerTurn;
 		PlayerTurn:
+			if (P.health == 0) goto Lose;
 			state = true;
 			clearScreen();
+			playerState = "default";
 			displayBorder();
+			hideCursor();
+			setColorDefault();
+			
 			headBar(startCol, columns, P, turnCounter); 
-			battleScreen(battleScreenCol, battleScreenRow, columns, rows); 
-			printDiscardIcon(); printDrawIcon();
-		    printMobContainer(C, mobStatsCol, mobStatsRow);
-		    printPlayerSprite(playerStatsCol, playerStatsRow);
-		    printPlayerStatus(P, playerStatsCol, playerStatsRow);
+			battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default"); 
+			
+			if (type == 1) {
+				printCurrentMob(C, mobStatsCol, playerStatsRow);
+				printMobContainer(C, mobStatsCol, mobStatsRow);
+			} else if (type == 2 || type == 3) {
+				printBossStats(boss, mobStatsCol, mobStatsRow);
+			}
 		    
+			printPlayerStatus(P, playerStatsCol, playerStatsRow);
 		    printDeck(P.hand, inHandCol, inHandRow);
 		    printCurrentCard(P.hand, playerStatsCol, playerStatsRow);
-		    printCurrentMob(C, mobStatsCol, playerStatsRow);
-		    showMobPlayer(C, columns, rows, state);
+		    printDiscardIcon(); 
+			printDrawIcon();
+		    showMobPlayer(boss, C, columns, rows, state);
 		    
 			key = getch();
 			switch(key){
@@ -65,52 +97,76 @@ void inGame(int startCol, int startRow){
 		                    playArrowBeep();
 		                    moveRight(&P.hand);
 		                    break;
+		                    
 		                case KEY_UP:
 		                	playArrowBeep();
-		                	moveRightMob(&C);
+		                	if (type == 1) moveRightMob(&C);
 		                	break;
 		                case KEY_DOWN:
 		                	playArrowBeep();
-		                	moveLeftMob(&C);	
+		                	if (type == 1) moveLeftMob(&C);	
 		                	break;
 		            }
 		            break;
 	            case KEY_ENTER:
 	            	playEnterBeep();
-	            	int tempMob = mobHealth(currentMob(C));
-					playCard(&P, &deckInventory, &C);
-	            	if (currentMob(C) != Nil && tempMob > mobHealth(currentMob(C))) {
-	            		state = false;
-						clearScreen();
-						displayBorder();
-						showMobPlayer(C, columns, rows, state);
-						Sleep(500);
-						state = true;
+                    playerState = strdup(cardType(currentCard(P.hand)));
+				    if (P.energy != 0){
+					    if (type == 1) {
+					        tempMob = mobHealth(currentMob(C));
+					    } else if (type == 2 || type == 3) {
+					        prevBossHealth = (boss != NULL) ? bossHealth(boss) : 0;
+					    }
+					    
+					    playCard(&P, &deckInventory, &C, boss);  
+						if (currentMob(C) != NULL && tempMob > mobHealth(currentMob(C))) {
+					        clearScreen();
+					        displayBorder();
+					        showMobPlayer(boss, C, columns, rows, false);
+					        Sleep(500);
+					    }
+					        
+						if (boss != NULL && prevBossHealth > bossHealth(boss)) {
+					    	clearScreen();
+					        displayBorder();
+					        showMobPlayer(boss, C, columns, rows, false);
+					        Sleep(500);
+					    }
+					    
+					    if (strcmp(playerState, "Shield") == 0) {
+					        battleScreen(battleScreenCol, battleScreenRow, columns, rows, playerState); 
+					        setColorDefault();
+					        Sleep(400);
+					    }
 					}
-					checkMobHealth(&C);
-	            	break;
+				    
+				    if (type == 1) {
+				        checkMobHealth(&C);
+				    }
+				    break;
 	            case 'h':
 	            	playEnterBeep();
-	            	executeMenuAction(4);
+	            	executeMenuAction(3);
 	            	break;
 	            case 'e':
 					turnCounter++; 
-	            	goto MobTurn;
+	            	if (type == 1) {
+                    	goto MobTurn;
+                    } else {
+                        goto BossTurn;
+                    }
 	            	break;
 		    	case 'q':
 		    		playEnterBeep();
 		    		SplashScreen();
 		    		running = 0;
-		    		goto end;
+		    		goto Lose;
 	                break;
-	            case 'm':				//Untuk akses merchant sementara
-					merchantScreen(&P, &deckInventory);
-	            	break;
-	            case 'c':				//Untuk akses rest sementara
-					restScreen(&P, &deckInventory);
-	            	break;
-				} 
-			if (countMob(C) == 0) goto end;
+			} 
+			if (type == 1 && countMob(C) == 0) goto Win;
+            if ((type == 2 || type == 3) && (boss == NULL || bossHealth(boss) <= 0)) goto Win;
+            
+            continue;
 	} 
 	
 	MobTurn:
@@ -120,34 +176,79 @@ void inGame(int startCol, int startRow){
 			clearScreen();
 			displayBorder();
 				
+			battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default"); 
 			headBar(startCol, columns, P, turnCounter);
-			battleScreen(battleScreenCol, battleScreenRow, columns, rows); 
 			printMobContainer(C, mobStatsCol, mobStatsRow);
 			printPlayerStatus(P, playerStatsCol, playerStatsRow);
-			showMobPlayer(C, columns, rows, state);
+			showMobPlayer(boss, C, columns, rows, state);
 			    
-			
+		    Sleep(500);
 			if (!strcmp(mobActionType(current), "attack")){
 				damage = attack(current);
+				battleScreen(battleScreenCol, battleScreenRow, columns, rows, "attacked"); 
+				setColorDefault();
 				takeDamage(&P, damage);
 			} else {
 				mobheal(&current);
-				P.shield = 0;
 			}
-			
 			current = mobNext(current);
-		    Sleep(1500);
+		    Sleep(1000);
 		}
 	    
-		initDiscardToInventory(&P.discard, &deckInventory);
+	    if (countDeck(deckInventory) <= 0){
+			initDiscardToInventory(&P.discard, &deckInventory);
+		}
 		initDeckInventoryToHand(&deckInventory, &P.hand, 0);
 		randAction(C);
 	    turnCounter++;
+		P.shield = 0;
+		P.energy = 3;
+		goto PlayerTurn;
+	
+	BossTurn:
+		clearScreen();
+		displayBorder();
+		
+		char bossAction[10];
+		int quantity = 0 ;
+		battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default");
+		headBar(startCol, columns, P, turnCounter);
+		
+		printBossStats(boss, mobStatsCol, mobStatsRow);
+		printPlayerStatus(P, playerStatsCol, playerStatsRow);
+		
+		showMobPlayer(boss, C, columns, rows, state);
+		executeBossAction(boss, bossAction, &quantity);
+		
+		Sleep(500);
+		if (!strcmp(bossAction, "Attack")) {
+			clearScreen();
+			if (!strcmp(bossType(boss), "dragoon")) {
+				battleScreen(battleScreenCol, battleScreenRow, columns, rows, "dragoon"); 
+			} else if (!strcmp(bossType(boss), "unicorn")) {
+				battleScreen(battleScreenCol, battleScreenRow, columns, rows, "unicorn"); 
+			} else if (!strcmp(bossType(boss), "griffin")) {
+				battleScreen(battleScreenCol, battleScreenRow, columns, rows, "griffin"); 
+			}
+			takeDamage(&P, quantity);
+		} else  {
+			bossHeal(boss, quantity);
+		}
+		
+		Sleep(1000);
+		if (countDeck(deckInventory) <= 0){
+			initDiscardToInventory(&P.discard, &deckInventory);
+		}
+        initDeckInventoryToHand(&deckInventory, &P.hand, 0);
 	    P.energy = 3;
-		if (countMob(C) != 0) goto PlayerTurn;
-	    else goto end;
-		    
-	end:
+	    turnCounter++;
+        
+        goto PlayerTurn;
+	
+	Win:
+		
+		return;
+	Lose:
 		SplashScreen();
 }
 
@@ -165,13 +266,13 @@ void headBar(int startCol, int max, Player P, int turnCounter){
 		printf("[]");
 	}
 	
-    gotoxy(startCol - 71, headBarRow + 2);
+    gotoxy(startCol - 72, headBarRow + 2);
 	setColorBrightWhite();
 	printf("===========");
-	gotoxy(startCol - 70, headBarRow + 3);
+	gotoxy(startCol - 71, headBarRow + 3);
 	setColorRed();
     printf("[Q] QUIT!");
-    gotoxy(startCol - 71, headBarRow + 4);
+    gotoxy(startCol - 72, headBarRow + 4);
     setColorBrightWhite();
 	printf("===========");
     
@@ -185,15 +286,15 @@ void headBar(int startCol, int max, Player P, int turnCounter){
     setColorBrightWhite();
 	printf("===========");
     
-    gotoxy(startCol + 30, headBarRow + 2);
+    gotoxy(startCol + 26, headBarRow + 2);
 	setColorBrightWhite();
 	printf("===================");
-	gotoxy(startCol + 31, headBarRow + 3);
+	gotoxy(startCol + 27, headBarRow + 3);
 	setColorBrightWhite();
     if (checkTurn == 0){
 		printf("[%d] PLAYER'S TURN", turnCounter);
 	} else printf(" [%d] MOB'S TURN", turnCounter);
-    gotoxy(startCol + 30, headBarRow + 4);
+    gotoxy(startCol + 26, headBarRow + 4);
     setColorBrightWhite();
 	printf("===================");
     
@@ -228,14 +329,35 @@ void headBar(int startCol, int max, Player P, int turnCounter){
 	}
 }
 
-void battleScreen(int startCol, int startRow, int columns, int rows){
+void battleScreen(int startCol, int startRow, int columns, int rows, char* state){
 	int i, bottomRow, maxCol;
 	
 	bottomRow = rows - 40;
-	maxCol = columns - 69;
+	maxCol = columns - 74;
+	const int screenBorder = (COLOR_WHITE * 16) + COLOR_WHITE;
+	const int screenBorderAttacked = (COLOR_RED * 16) + COLOR_RED;
+	const int screenBorderBlock = (COLOR_BLUE * 16) + COLOR_BLUE;
+	
+	if (!strcmp(state, "attacked")){
+		setTextColor(screenBorderAttacked);
+	} else if (!strcmp(state, "Shield")) {
+		setTextColor(screenBorderBlock);
+	} else if (!strcmp(state, "dragoon")){
+		printBossAttack(startCol, startRow, "dragoon");
+		setTextColor(screenBorderAttacked);
+	} else if (!strcmp(state, "unicorn")) {
+		printBossAttack(startCol, startRow, "unicorn");
+		setTextColor(screenBorderAttacked);
+	} else if (!strcmp(state, "griffin")) {
+		printBossAttack(startCol, startRow, "griffin");
+		setTextColor(screenBorderAttacked);
+	} else setTextColor(screenBorder);
+	
+	
+	
+	startRow -= 1;
 	gotoxy(startCol, startRow);
-	setColorHighlight();
-	for(i = 0; i < maxCol; i++) printf("=");
+	for(i = 0; i <= maxCol; i++) printf("=");
 	for(i = 1; i <= bottomRow; i++) {
 		gotoxy(startCol, startRow + i);
 		printf("||");
@@ -243,72 +365,34 @@ void battleScreen(int startCol, int startRow, int columns, int rows){
 		printf("||");
 	}
 	gotoxy(startCol, bottomRow + startRow);
-	for(i = 0; i < maxCol; i++) printf("=");
-	setColorDefault;
+	for(i = 0; i <= maxCol; i++) printf("=");
+	
+	setColorDefault();
 }
 
-void showMobPlayer(mobContainer C, int columns, int rows, boolean state){
+void showMobPlayer(Boss* boss, mobContainer C, int columns, int rows, boolean state){
 	int i, startCol, startRow;
-	startCol = columns - 100;
-	startRow = rows / 3;
-	mobAddress current = firstMob(C);
 	
-	while (current != Nil){
-		i = 1;
-		if (!strcmp(mobType(current), "Goblin")) {
-			setColorLightCyan();
-			gotoxy(startCol, startRow + i); i++;
-			printf("  [%d] ", mobCounter(current));
-			if (!state) setColorRed();
-			else setColorGreen();
-		} else if (!strcmp(mobType(current), "Ghost")) {
-			i = 5;
-			setColorLightCyan();
-			gotoxy(startCol, startRow + i); i++;
-			printf(" [%d] ", mobCounter(current));
-			if (!state) setColorRed();
-			else setColorBrightWhite(); 
-		}
-		if (current == currentMob(C) && state){
-			gotoxy(startCol, startRow);
-			setColorGray();
-		}
-		
-		if (!strcmp(mobType(current), "Goblin")){
-			gotoxy(startCol, startRow + i); i++;
-			printf(" .-^-. ");
-			gotoxy(startCol, startRow + i); i++;
-			printf("( @ @ )");
-			gotoxy(startCol, startRow + i); i++;
-			printf(" \\ V /");
-			gotoxy(startCol, startRow + i); i++;
-			printf(" .='=.");
-			gotoxy(startCol, startRow + i); i++;
-			printf("//\\_/\\\\");
-			gotoxy(startCol, startRow + i); i++;
-			printf("\\)|_|(/");
-			gotoxy(startCol, startRow + i); i++;
-			printf("  /|\\");
-			gotoxy(startCol, startRow + i); i++;
-			printf(" (/ \\)");
-		} else if (!strcmp(mobType(current), "Ghost")) {
-			i = 6;
-			gotoxy(startCol, startRow + i); i++;
-			printf(" .-. ");
-			gotoxy(startCol, startRow + i); i++;
-    		printf("| OO|");
-    		gotoxy(startCol, startRow + i); i++;
-    		printf("|   |");
-    		gotoxy(startCol, startRow + i); i++;
-    		printf("'^^^'");
-		}
-		startCol += 21;
-		current = mobNext(current);
+	printMob(startCol, startRow, columns, rows, C, state);
+	
+	/**/
+	if (boss != Nil) {
+        startCol = columns - 100;
+        startRow = rows / 3;
+        printBoss(startCol, startRow, boss, state);
+        
 	}
 	
+	startCol = (columns / 4) - 50;
+	startRow = rows / 3 - 5;
+	setColorDefault();
+	printPlayerSprite(startCol, startRow);
+	
+	setColorDefault();
+	
 }
 
-void playCard(Player *P, cardDeck *Inventory, mobContainer *C) {
+void playCard(Player *P, cardDeck *Inventory, mobContainer *C, Boss* boss) {
 	cardAddress played = currentCard(P->hand);
 	if (cardCost(played) > P->energy) {
 		return;
@@ -323,15 +407,20 @@ void playCard(Player *P, cardDeck *Inventory, mobContainer *C) {
 	
 		useEnergy(P, cardCost(played));
 	
-		// Simulasi efek
-		if (strcmp(cardType(played), "Attack") == 0) {
-			attacked(cardEffect(played), C);
-		} else if (strcmp(cardType(played), "Shield") == 0) {
-			P->shield += cardEffect(played);
-		} else if (strcmp(cardType(played), "Draw") == 0) {
-			initDeckInventoryToHand(Inventory, &P->hand, cardEffect(played));
-		}
-		pushDiscard(&P->discard, played);
+        if (strcmp(cardType(played), "Attack") == 0) {
+            if (currentMob(*C) != NULL) {
+                // Fighting mobs
+                attacked(cardEffect(played), C);
+            } else if (boss != NULL) {
+                // Fighting boss
+                attackedBoss(cardEffect(played), boss);
+            }
+        } else if (strcmp(cardType(played), "Shield") == 0) {
+            P->shield += cardEffect(played);
+        } else if (strcmp(cardType(played), "Draw") == 0) {
+            initDeckInventoryToHand(Inventory, &P->hand, cardEffect(played));
+        }
+        pushDiscard(&P->discard, played);
 	}
 }
 
@@ -341,6 +430,11 @@ void merchantScreen(Player *player, cardDeck *inventory) {
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	int columns = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2;
 	int rows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2;
+	/*
+	int nameCol = 50;
+	int nameRow = 5;
+	int i = 0;
+	*/
 	
     // Array 2x5 merchant card
     cardAddress merchantCards[2][5];
@@ -356,9 +450,9 @@ void merchantScreen(Player *player, cardDeck *inventory) {
     }
 
     int currentRow = 0, currentCol = 0;
-    
-	bool exitMerchant = false;
+    bool exitMerchant = false;
 	bool isBuy = false;
+
     while (!exitMerchant) {
     	clearScreen();
     	displayBorder();
@@ -401,8 +495,8 @@ void merchantScreen(Player *player, cardDeck *inventory) {
             }
         }
         gotoxy(columns - 10, rows + 18);
-        printf("Use arrow keys to move, ENTER to buy, ESC to exit.");
-
+		printf("Use arrow keys to move, ENTER to buy, ESC to exit.");
+		
         int ch = getch();
         if (ch == 224) {
             ch = getch();
@@ -470,7 +564,8 @@ cardAddress generateRandomCard() {
     }
 }
 
-void printMerchant(){//Size (34, 18)
+void printMerchant(){
+	int i = 1;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) - 38;
@@ -494,7 +589,7 @@ void printMerchant(){//Size (34, 18)
 	gotoxy(startCol, startRow++); printf("          ##%sMERCHANT%s## %s           ", RESET, BLUE, RESET);
 }
 
-void printHand(int column, int row){ //Size (24, 16)
+void printHand(int column, int row){
 	int startCol, startRow;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -503,56 +598,25 @@ void printHand(int column, int row){ //Size (24, 16)
 	
 	startCol = (startCol - 55) + 22 * column;
 	startRow = (startRow - 29) + 15 * row;
-	
-	gotoxy(startCol, startRow++); printf(" %s.@<=)[{{}{}{]}}]@@=]-. ", BLUE);
-	gotoxy(startCol, startRow++); printf(" .@-)~............)(@-. ");
-	gotoxy(startCol, startRow++); printf(" .@@....:-:.-~~..*>-@.. ");
-	gotoxy(startCol, startRow++); printf(" .:@-.......::~~~-=..@. ");
-	gotoxy(startCol, startRow++); printf(" ...(@@<...>@@@@@@@..@. ");
-	gotoxy(startCol, startRow++); printf(" %s.+@@@@@@@@@@@@@@@@@.@. ", CYAN);
-	gotoxy(startCol, startRow++); printf(" .@@@###@@@@{#####(@.@. ");
-	gotoxy(startCol, startRow++); printf(" .@@...::=.*.@@@@##@@.. ");
-	gotoxy(startCol, startRow++); printf(" .{@@#######@@@@@@#@@.. ");
-	gotoxy(startCol, startRow++); printf(" ..@@@@@-###@@##@@#@@{. ");
-	gotoxy(startCol, startRow++); printf(" ...@@@@@@##@@@@#.@@@@. ");
-	gotoxy(startCol, startRow++); printf(" ......@@@@@@@}..@@~... ");
-	gotoxy(startCol, startRow++); printf(" ........{@@@..-@@..... ");
-	gotoxy(startCol, startRow++); printf(" .........[@@.......... ");
-	gotoxy(startCol, startRow++); printf(" .........(@@.......... ");
-	gotoxy(startCol, startRow++); printf(" .........[@*..........%s ", RESET);
+	gotoxy(startCol, startRow++); printf(" %s.@<=)[{{}{}{]}}]@@=]-  ", BLUE);
+	gotoxy(startCol, startRow++); printf("  @-)~............)(@-  ");
+	gotoxy(startCol, startRow++); printf("  @@....:-:.-~~..*>-@   ");
+	gotoxy(startCol, startRow++); printf("  :@-.......::~~~-=..@  ");
+	gotoxy(startCol, startRow++); printf("    (@@<...>@@@@@@@..@  ");
+	gotoxy(startCol, startRow++); printf(" %s.+@@@@@@@@@@@@@@@@@.@  ", CYAN);
+	gotoxy(startCol, startRow++); printf("  @@@###@@@@{#####(@.@  ");
+	gotoxy(startCol, startRow++); printf("  @@...::=.*.@@@@##@@   ");
+	gotoxy(startCol, startRow++); printf("  {@@#######@@@@@@#@@   ");
+	gotoxy(startCol, startRow++); printf("   @@@@@-###@@##@@#@@{  ");
+	gotoxy(startCol, startRow++); printf("    @@@@@@##@@@@#.@@@@  ");
+	gotoxy(startCol, startRow++); printf("       @@@@@@@}..@@~    ");
+	gotoxy(startCol, startRow++); printf("         {@@@..-@@      ");
+	gotoxy(startCol, startRow++); printf("          [@@           ");
+	gotoxy(startCol, startRow++); printf("          (@@           ");
+	gotoxy(startCol, startRow++); printf("          [@*          %s ", RESET);
 }
 
-void skipLabel(const char* name){ //Size (33, 7)
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) - 33;
-	int startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 9;
-	
-	gotoxy(startCol, startRow++); printf("   //===========================");
-	gotoxy(startCol, startRow++); printf("  //       Press [ESC] to		");
-	gotoxy(startCol, startRow++); printf(" //  //====  ||// ||  ||>>\\\\	");
-	gotoxy(startCol, startRow++); printf("<<   \\\\===\\\\ ||<< ||  ||>>//	");
-	gotoxy(startCol, startRow++); printf(" \\   ====//  ||\\\\ ||  ||		");
-	gotoxy(startCol, startRow++); printf("  \\ 	 %9s   	", name);
-	gotoxy(startCol, startRow++); printf("   \\===========================");
-}
-
-void proceedLabel(){ //Size (33, 7)
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) - 33;
-	int startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 9;
-	
-	gotoxy(startCol, startRow++); printf("   //===========================");
-	gotoxy(startCol, startRow++); printf("  //       Press [ESC] to		");
-	gotoxy(startCol, startRow++); printf(" // |\\     __  __  __  __   __|");
-	gotoxy(startCol, startRow++); printf("<<  |/ |~ | | |   |__ |__  |  |");
-	gotoxy(startCol, startRow++); printf(" \\  |  |  |_| |__ |__ |__  |__|");
-	gotoxy(startCol, startRow++); printf("  \\ 		            		");
-	gotoxy(startCol, startRow++); printf("   \\===========================");
-}
-
-void printCard(int column, int row, Card *shopCard){//Size (22, 12)
+void printCard(int column, int row, Card *shopCard){
 	int length, startCol, startRow;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -563,12 +627,12 @@ void printCard(int column, int row, Card *shopCard){//Size (22, 12)
 	startRow = (startRow - 13) + 15 * row;
 	gotoxy(startCol, startRow++); printf(" .==================. ");
 	for (length = 0; length < 10; length++) {
-		gotoxy(startCol, startRow++); printf(" .||              ||. ");
+			gotoxy(startCol, startRow++); printf(" .||              ||. ");
 	}
 	gotoxy(startCol, startRow++); printf(" .==================. ");
 }
 
-//Rest Site
+//Rest Area
 void restScreen(Player *player, cardDeck *deck) {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -579,8 +643,7 @@ void restScreen(Player *player, cardDeck *deck) {
 	bool chooseHeal = true;
 	bool isResting = false;
 	
-//    gotoxy(startCol, 21); printf("HP: %d/%d\n", player->health, MAX_PLAYER_HEALTH);	
-    
+	//Selection
     while (!exitRestSite) {
     	clearScreen();
     	displayBorder();
@@ -591,7 +654,7 @@ void restScreen(Player *player, cardDeck *deck) {
 			skipLabel("Rest Site");
 		}
 
-		// Display 2 Option (Rest and Smith)
+	    // Display 2 Option (Rest and Smith)
 		printRest();
 		printSmith();
 		// Display highlighter
@@ -627,7 +690,7 @@ void restScreen(Player *player, cardDeck *deck) {
 	    } else if (ch == KEY_ESC) {
 	        exitRestSite = true;
     	}
-    }
+	}
 }
 
 void campFire() { //Size (61, 34)
@@ -774,5 +837,35 @@ void highlightRight() {
 	for (length = 1; length < 54; length++) {
 		gotoxy(startCol + length, startRow); printf("=");
 	}
+}
+
+void skipLabel(const char* name){ //Size (33, 7)
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) - 33;
+	int startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 9;
+	
+	gotoxy(startCol, startRow++); printf("   //===========================");
+	gotoxy(startCol, startRow++); printf("  //       Press [ESC] to		");
+	gotoxy(startCol, startRow++); printf(" //  //====  ||// ||  ||>>\\\\	");
+	gotoxy(startCol, startRow++); printf("<<   \\\\===\\\\ ||<< ||  ||>>//	");
+	gotoxy(startCol, startRow++); printf(" \\   ====//  ||\\\\ ||  ||		");
+	gotoxy(startCol, startRow++); printf("  \\ 	 %9s   	", name);
+	gotoxy(startCol, startRow++); printf("   \\===========================");
+}
+
+void proceedLabel(){ //Size (33, 7)
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) - 33;
+	int startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 9;
+	
+	gotoxy(startCol, startRow++); printf("   //===========================");
+	gotoxy(startCol, startRow++); printf("  //       Press [ESC] to		");
+	gotoxy(startCol, startRow++); printf(" // |\\     __  __  __  __   __|");
+	gotoxy(startCol, startRow++); printf("<<  |/ |~ | | |   |__ |__  |  |");
+	gotoxy(startCol, startRow++); printf(" \\  |  |  |_| |__ |__ |__  |__|");
+	gotoxy(startCol, startRow++); printf("  \\ 		            		");
+	gotoxy(startCol, startRow++); printf("   \\===========================");
 }
 
