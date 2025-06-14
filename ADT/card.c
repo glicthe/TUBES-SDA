@@ -307,24 +307,40 @@ cardAddress popDiscard(discardPile *P) {
 }
 
 void initDiscardToInventory(discardPile *P, cardDeck *D){
-	discardPtr temp = topDiscard(*P);
-	while (temp != Nil){
-		cardAddress current = popDiscard(P);
-		addCardToDeck(D, current);
-		temp = topDiscard(*P);
+	if (D == Nil) {
+		discardPtr temp = topDiscard(*P);
+		while (temp != Nil){
+			cardAddress current = popDiscard(P);
+			addCardToDeck(D, current);
+			temp = topDiscard(*P);
+		}
 	}
 }
 
-void printDiscard(discardPile P) {
-    discardPtr temp = topDiscard(P);
-    int i = 1;
-    while (temp) {
-        printf("  %d: %s (%s)\n", i++, cardName(temp->card), cardType(temp->card));
-        temp = temp->next;
+void showDiscardPile(discardPile discard) {
+	clearScreen();
+	gotoxy(0, 0);
+	
+	int count = 0;
+	discardPtr current = discard.top;
+    while (current != NULL) {
+        printf("%p\n", current->next);
+        current = current->next;
+        // Count the total card in discard pile
+        count++;
     }
+	printAllCards(count);
+    getch();
+    system("pause");
 }
 
+void showDrawPile(cardDeck deckInventory) {
+	
+}
 
+void showDeck(discardPile discard, cardDeck hand, cardDeck deckInventory) {
+	
+}
 
 void printDrawIcon() {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -364,4 +380,30 @@ void printDiscardIcon() { // Size (32 , 14)
 	gotoxy(startCol, startRows++); printf("   .+**################*-      ");
 	gotoxy(startCol, startRows++); printf("         =***#########*=       ");
 	gotoxy(startCol, startRows++); printf("              .-+***##=        ");
+}
+
+void printCards(int column, int row) {
+    int length, startCol, startRow;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2;
+    startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2;
+
+    startCol = (startCol - 55) + 22 * column;
+    startRow = (startRow - 13) + 15 * row;
+
+    gotoxy(startCol, startRow++); printf(" .==================. ");
+    for (length = 0; length < 10; length++) {
+        gotoxy(startCol, startRow++); printf(" .||              ||. ");
+    }
+    gotoxy(startCol, startRow++); printf(" .==================. ");
+}
+
+void printAllCards(int cardCount) {
+    int i = 0;
+	for (i; i < cardCount; i++) {
+        int col = i % 5;
+        int row = i / 5;
+        printCards(col, row);
+    }
 }

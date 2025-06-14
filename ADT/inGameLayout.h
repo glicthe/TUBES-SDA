@@ -17,7 +17,7 @@ cardAddress generateRandomCard();
 void printMerchant();
 void skipLabel(const char* name);
 void printHand(int Column, int row);
-void printCard(int column, int row, Card *shopCard);
+void printMerchantCard(int column, int row, Card *shopCard);
 
 // Rest
 void restScreen(Player *player, cardDeck *deck);

@@ -109,6 +109,15 @@ void inGame(int startCol, int startRow){
 	            case 'c':				//Untuk akses rest sementara
 					restScreen(&P, &deckInventory);
 	            	break;
+				case 'd':
+					showDiscardPile(P.discard);
+					break;
+				case 's':
+					showDrawPile(deckInventory);
+					break;
+				case 'a':
+					showDeck(P.discard, P.hand, deckInventory);
+					break;				
 				} 
 			if (countMob(C) == 0) goto end;
 	} 
@@ -375,7 +384,7 @@ void merchantScreen(Player *player, cardDeck *inventory) {
 	    int gap = 19;
 	    for (row = 0; row < 2; row++) {
 	        for (column = 0; column < 5; column++) {
-	        	printCard(column, row, merchantCards[row][column]);
+	        	printMerchantCard(column, row, merchantCards[row][column]);
 	        }
 	    }
 
@@ -385,7 +394,7 @@ void merchantScreen(Player *player, cardDeck *inventory) {
                 if (row == currentRow && column == currentCol) {
                     // Position
                     printHand(column, row);
-                    setColorBlue(); printCard(column, row, merchantCards[row][column]); setColorWhite();
+                    setColorBlue(); printMerchantCard(column, row, merchantCards[row][column]); setColorWhite();
                     gotoxy(columns - 10, rows + 16);
 		        	if (merchantCards[row][column] != Nil) {
 						printf("%-12s (%s) - %d [%d gold]\n",
@@ -547,12 +556,12 @@ void proceedLabel(){ //Size (33, 7)
 	gotoxy(startCol, startRow++); printf("  //       Press [ESC] to		");
 	gotoxy(startCol, startRow++); printf(" // |\\     __  __  __  __   __|");
 	gotoxy(startCol, startRow++); printf("<<  |/ |~ | | |   |__ |__  |  |");
-	gotoxy(startCol, startRow++); printf(" \\  |  |  |_| |__ |__ |__  |__|");
-	gotoxy(startCol, startRow++); printf("  \\ 		            		");
-	gotoxy(startCol, startRow++); printf("   \\===========================");
+	gotoxy(startCol, startRow++); printf(" \\\\ |  |  |_| |__ |__ |__  |__|");
+	gotoxy(startCol, startRow++); printf("  \\\\ 		            		");
+	gotoxy(startCol, startRow++); printf("   \\\\===========================");
 }
 
-void printCard(int column, int row, Card *shopCard){//Size (22, 12)
+void printMerchantCard(int column, int row, Card *shopCard){//Size (22, 12)
 	int length, startCol, startRow;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);

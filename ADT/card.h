@@ -71,8 +71,7 @@ void moveLeft(cardDeck *D);
 void moveRight(cardDeck *D);
 void moveToHead(cardDeck *D);
 void moveToTail(cardDeck *D);
-void printCurrentCard(cardDeck D, int startCol, int startRow);
-void printDeck(cardDeck D, int startCol, int startRRow);
+
 int countDeck(cardDeck D);
 
 
@@ -85,10 +84,20 @@ void pushDiscard(discardPile *P, cardAddress C);
 cardAddress popDiscard(discardPile *P);
 void printDiscard(discardPile P);
 void initDiscardToInventory(discardPile *P, cardDeck *D);
-void printDiscardIcon();
-void printDrawIcon();
+
 
 // Cleanup
 void freeCard(cardAddress C);
+
+// Visual
+void printCurrentCard(cardDeck D, int startCol, int startRow);
+void printDeck(cardDeck D, int startCol, int startRRow);
+void showDiscardPile(discardPile discard);
+void showDrawPile(cardDeck deckInventory);
+void showDeck(discardPile discard, cardDeck hand, cardDeck deckInventory);
+void printDiscardIcon();
+void printDrawIcon();
+void printCards(int column, int row);
+void printAllCards(int cardCount);
 
 #endif
