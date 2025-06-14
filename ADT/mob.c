@@ -326,6 +326,68 @@ void printCurrentMob(mobContainer C, int startCol, int startRow) {
     }
 }
 
+void printMob(int startCol, int startRow, int columns, int rows, mobContainer C, boolean state) {
+	int i;
+	mobAddress current = firstMob(C);
+	
+	if (current != Nil) {
+		startCol = columns - 100;
+		startRow = rows / 3;
+		while (current != Nil) {
+			i = 1;
+			if (!strcmp(mobType(current), "Goblin")) {
+				setColorLightCyan();
+				gotoxy(startCol, startRow + i); i++;
+				printf("  [%d] ", mobCounter(current));
+				if (!state) setColorRed();
+				else setColorGreen();
+			} else if (!strcmp(mobType(current), "Ghost")) {
+				i = 6;
+				setColorLightCyan();
+				gotoxy(startCol, startRow + i); i++;
+				printf(" [%d] ", mobCounter(current));
+				if (!state) setColorRed();
+				else setColorBrightWhite(); 
+			}
+			if (current == currentMob(C) && state){
+				gotoxy(startCol, startRow);
+				setColorGray();
+			}
+	
+			if (!strcmp(mobType(current), "Goblin")){
+				gotoxy(startCol, startRow + i); i++;
+				printf(" .-^-. ");
+				gotoxy(startCol, startRow + i); i++;
+				printf("( @ @ )");
+				gotoxy(startCol, startRow + i); i++;
+				printf(" \\ V /");
+				gotoxy(startCol, startRow + i); i++;
+				printf(" .='=.");
+				gotoxy(startCol, startRow + i); i++;
+				printf("//\\_/\\\\");
+				gotoxy(startCol, startRow + i); i++;
+				printf("\\)|_|(/");
+				gotoxy(startCol, startRow + i); i++;
+				printf("  /|\\");
+				gotoxy(startCol, startRow + i); i++;
+				printf(" (/ \\)");
+			} else if (!strcmp(mobType(current), "Ghost")) {
+				i = 6;
+				gotoxy(startCol, startRow + i); i++;
+				printf(" .-. ");
+				gotoxy(startCol, startRow + i); i++;
+		    	printf("| OO|");
+		    	gotoxy(startCol, startRow + i); i++;
+		    	printf("|   |");
+		    	gotoxy(startCol, startRow + i); i++;
+		    	printf("'^^^'");
+			}
+			startCol += 21;
+			current = mobNext(current);
+		}
+	} 
+}
+
 void randGenerateMob(mobContainer *C){ 
 	int makeMob = (randNumGenerator() % 2) + 1;
 	while (makeMob != 0){

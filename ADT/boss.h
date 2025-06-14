@@ -37,15 +37,19 @@ typedef struct Boss{
 void createPattern(patternQueue *Q);
 patternAddress allocatePattern(char* action, int qty);
 Boss* createBoss(const char* bossType, int Health, patternQueue *P);
+Boss* createRandSecondaryBoss();
 
-void unicornPattern(patternQueue *P);
-void griffinPattern();
-void dragoonPattern();
+void unicornPattern(patternQueue *P, Boss* boss);
+void griffinPattern(patternQueue *P, Boss* boss);
+void dragoonPattern(patternQueue *P, Boss* boss);
 
 // Read Function
 void printPatternQueue(patternQueue Q);
 boolean isEmptyPattern(patternQueue Q);
 void getCurrentBossAction(Boss* boss, char* action, int* qty);
+void printBossStats(Boss* boss, int startCol, int startRow);
+void printBossAttack(int startCol, int startRow, char* state);
+void printBoss(int startCol, int startRow, Boss* boss, boolean state);
 void advanceBossAction(Boss* boss);
 void executeBossAction(Boss* boss, char* action, int* qty);
 
@@ -53,10 +57,13 @@ void executeBossAction(Boss* boss, char* action, int* qty);
 void enqueuePattern(patternQueue *Q, char* action, int qty);
 void dequeuePattern(patternQueue *Q, char* action, int *qty);
 int randAttackValue(const char* bossType);
+void bossHeal(Boss* boss, int heal);
+void attackedBoss(int damage, Boss* boss);
 
 // Delete Function
 void deallocatePattern(patternAddress P);
 void clearPatternQueue(patternQueue *Q);
+void deleteBoss(Boss* boss);
 
 
 #endif

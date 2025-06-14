@@ -25,7 +25,7 @@ cardAddress createCard(const char* name, const char* type, int cost, int value) 
 }
 
 void starterDeckInventory(cardDeck *D){
-	int Num;
+	int Num = 0;
 	while (Num < 10){
 		if (Num <= 3) {
 			cardAddress addCard = createCard("Slash", "Attack", 1, 4);
@@ -37,7 +37,7 @@ void starterDeckInventory(cardDeck *D){
 			cardAddress addCard = createCard("Draw", "Draw", 2, 3);
 			addCardToDeck(D, addCard);
 		} else {
-			cardAddress addCard = createCard("SuperSlash", "Attack", 3, 9);
+			cardAddress addCard = createCard("SuperSlash", "Attack", 3, 14);
 			addCardToDeck(D, addCard);
 		}
 		Num++;
@@ -50,6 +50,9 @@ void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand, int drawAmount
     cardAddress temp = (*hand).current;
     
     int countInv = countDeck(*inventory);
+    if (countInv == 0) {
+    	return;
+	}
     int countHand = countDeck(*hand);
     if (drawAmount > 0) {
         drawDeck = drawAmount;  
@@ -63,6 +66,8 @@ void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand, int drawAmount
     count = 0;
 	while (count < drawDeck) {
         num = rand() % (max - min + 1) + min;
+        
+        if (currentCard(*inventory) == Nil) break;
         
         if (used[num] == 0) {
             used[num] = 1; 
@@ -195,67 +200,83 @@ cardAddress playCurrentCard(cardDeck *D) {
 
 void printDeck(cardDeck D, int startCol, int startRow) {
     cardAddress temp = deckHead(D);
-    int boxTopBot = 15;
-    int boxLeftRight = 10;
-    
+    int boxTopBot = 16;
+    int boxLeftRight = 11;
+    char name[10];
+    int i, j, countCard, startColReset;
     if (countDeck(D) > 5){
-    	startCol -= 18;
+    	startCol -= 21;
 	} 
-    int i;
+    startColReset = startCol;
     while (temp != Nil) {
         i = 1;
+        if (countCard == 7) {
+			startCol = startColReset;
+			startRow += 13;
+			 
+		}
     	gotoxy(startCol, startRow);
-    	if (temp == currentCard(D)) setColorLightCyan();
+    	if (temp == currentCard(D)) setColorBlue();
 		else setColorBrightWhite(); 
-		for(i = 0; i < boxTopBot; i++) printf("-");
+		for(i = 0; i <= boxTopBot; i++) printf("=");
 		for(i = 1; i <= boxLeftRight; i++) {
 			gotoxy(startCol, startRow + i);
-			printf("|");
-			gotoxy(startCol + boxTopBot - 1, startRow + i);
-			printf("|");
+			printf("||");
+			gotoxy(startCol + boxTopBot -1, startRow + i);
+			printf("||");
 		}
 		gotoxy(startCol, startRow + boxLeftRight);
-		for(i = 0; i < boxTopBot; i++) printf("-");
+		for(i = 0; i <= boxTopBot; i++) printf("=");
 		
 		gotoxy(startCol, startRow);
 		setColorYellow();
 		printf("[%d]", cardCost(temp));
-		
+		i = 3;
 		if (strcmp(cardType(temp), "Attack") == 0){
-			gotoxy(startCol + 5, startRow + 2);
 	    	setColorLightRed();
+			gotoxy(startCol + 6, startRow + i); i++;
 			printf("  ^  ");
-			gotoxy(startCol + 5, startRow + 3);
+			gotoxy(startCol + 6, startRow + i); i++;
 			printf("  |  ");
-			gotoxy(startCol + 5, startRow + 4);
+			gotoxy(startCol + 6, startRow + i); i++;
 	    	printf("._|_.");
-	    	gotoxy(startCol + 5, startRow + 5);
+	    	gotoxy(startCol + 6, startRow + i); i++; i++;
 	    	printf("  I  ");
-	    	gotoxy(startCol + 5, startRow + 7);
-	    	if (strcmp(cardName(temp), "SuperSlash") == 0){
-				printf("Super");
-				gotoxy(startCol + 5, startRow + 8);
-				printf("Slash");
-			} else printf("%s", cardName(temp));
 		} else if (strcmp(cardType(temp), "Shield") == 0){
 			setColorLightBlue();
-			gotoxy(startCol + 5, startRow + 2);
+			gotoxy(startCol + 6, startRow + i); i++;
 			printf("<--->");
-			gotoxy(startCol + 5, startRow + 3);
+			gotoxy(startCol + 6, startRow + i); i++;
 		    printf("|_|_|");
-			gotoxy(startCol + 5, startRow + 4);
+			gotoxy(startCol + 6, startRow + i); i++;
 		    printf("|_|_|");
-	    	gotoxy(startCol + 5, startRow + 5);
+	    	gotoxy(startCol + 6, startRow + i); i++; i++;
 		    printf("\\|_|/");
-	    	gotoxy(startCol + 5, startRow + 7);	
-		    printf("%s", cardName(temp));
 		}
-			
-		gotoxy(startCol + boxTopBot - 3, startRow + boxLeftRight);
+		gotoxy(startCol + 6, startRow + i); i++; 
+	    if (strlen(cardName(temp)) > 5){
+		    strcpy(name, cardName(temp));
+		    j = 0;
+		    
+		    while(j < strlen(name) && j < 10) {
+		        if (j > 0 && isupper(name[j])) {
+		            // Found uppercase after first character, move to next line
+		            gotoxy(startCol + 6, startRow + i); 
+		            i++;
+		        }
+		        printf("%c", name[j]);
+		        j++;
+		    }
+		} else {
+	    printf("%s", cardName(temp));
+		}
+		
+		gotoxy(startCol + boxTopBot - 2, startRow + boxLeftRight);
 		setColorRed();
 		printf("[%d]", cardEffect(temp));
 		setColorBrightWhite();
         startCol += (boxTopBot + 5);
+        countCard++;
         temp = cardNext(temp);
     }
 }
@@ -345,7 +366,7 @@ void showDeck(discardPile discard, cardDeck hand, cardDeck deckInventory) {
 void printDrawIcon() {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	int startCol = 3;
+	int startCol = 7;
 	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 17;
 	gotoxy(startCol, startRows++); printf("%s                .:==.          ", RESET);
 	gotoxy(startCol, startRows++); printf("        :++++-.  .. =-         ");

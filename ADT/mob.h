@@ -58,7 +58,7 @@ int countMob(mobContainer C);
 void InsertLast(mobContainer *C, mobAddress selectedMob);
 void printMobContainer(mobContainer C, int startCol, int startRow);
 void printCurrentMob(mobContainer C, int startCol, int startRow);
-void printCurrentMob(mobContainer C, int startCol, int startRow);
+void printMob(int startCol, int startRow, int columns, int rows, mobContainer C, boolean state);
 
 // delete function
 void deleteMob(mobContainer *C, mobAddress mobToDelete);

@@ -23,7 +23,6 @@ typedef struct Player {
 Player createPlayer();
 void printPlayerSprite(int startCol, int startRows);
 
-
 // Status
 void printPlayerStatus(Player P, int startCol, int startRow);
 
