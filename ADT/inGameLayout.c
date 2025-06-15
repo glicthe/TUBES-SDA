@@ -15,8 +15,8 @@ void inGame(int startCol, int startRow, int type, int depth){
 	}
 	
 	if (type == 1) {
-		boss = Nil;
     	randGenerateMob(&C);
+    	boss = Nil;
 	} else if (type == 2) {
 		boss = createRandSecondaryBoss(boss);
 	} else if (type == 3) {
