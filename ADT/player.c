@@ -88,24 +88,24 @@ void useEnergy(Player *P, int amount) {
 }
 
 void printPlayerSprite(int startCol, int startRows){
-	startCol += 36; startRows += 4;
-    gotoxy(startCol, startRows++); printf("                             ______        ");
-    gotoxy(startCol, startRows++); printf("                            /      \\    ");
-    gotoxy(startCol, startRows++); printf("                 _________  \\  |\\/\\ \\    ");
-    gotoxy(startCol, startRows++); printf("                /__/_____ \\__\\_\\   \\|    ");
-    gotoxy(startCol, startRows++); printf("              ___________\\/ \\/  ___//    ");
-    gotoxy(startCol, startRows++); printf("             /__/_____/  /\\  \\_/_\\        ");
-    gotoxy(startCol, startRows++); printf("                _/    |    _ _/            ");
-    gotoxy(startCol, startRows++); printf("               /_   / \\_____/            ");
-    gotoxy(startCol, startRows++); printf("              /\\/\\  |     /                ");
-    gotoxy(startCol, startRows++); printf("            _/\\//|  /    /                ");
-    gotoxy(startCol, startRows++); printf("           /\\__/\\/_/    /                ");
-    gotoxy(startCol, startRows++); printf("          |/\\\\         /                ");
-    gotoxy(startCol, startRows++); printf("          /\\//\\        \\                ");
-    gotoxy(startCol, startRows++); printf("       __///__/\\_______/                ");
-    gotoxy(startCol, startRows++); printf("      | ///_\\__/   \\ \\                    ");
-    gotoxy(startCol, startRows++); printf("      |///          \\ \\                    ");
-    gotoxy(startCol, startRows++); printf("      ///            /_/                ");
-    gotoxy(startCol, startRows++); printf("     |//            /_/_                ");
-    gotoxy(startCol, startRows++); printf("     \\/            |____\\            ");
+    startCol += 36; startRows += 4;
+    gotoxy(startCol, startRows++); printf("%s                             ______        %s", RESET);
+    gotoxy(startCol, startRows++); printf("%s                            /      \\    %s", RESET);
+    gotoxy(startCol, startRows++); printf("%s                 _________  %s\\  |\\/\\ \\    %s", LRED, RESET, RESET);
+    gotoxy(startCol, startRows++); printf("%s                /__/_____ \\__%s\\_\\   \\|    %s", LRED, RESET, RESET);
+    gotoxy(startCol, startRows++); printf("%s              ___________\\/ \\%s/  ___/%s/    %s", LRED, BROWN, RESET, RESET);
+    gotoxy(startCol, startRows++); printf("%s             /__/_____/  /\\  \\_%s/%s_\\        %s", LRED, BROWN, LRED, RESET);
+    gotoxy(startCol, startRows++); printf("%s                %s_/    %s|    _ _/            %s", RESET, LBLUE, LRED, RESET);
+    gotoxy(startCol, startRows++); printf("%s               %s/_   / %s\\_____/            %s", RESET, LBLUE, LRED, RESET);
+    gotoxy(startCol, startRows++); printf("%s              %s/\\/\\  |     /                %s", RESET, LBLUE, RESET);
+    gotoxy(startCol, startRows++); printf("%s            %s_/\\//%s|  /    /                %s", RESET, BROWN, LBLUE, RESET);
+    gotoxy(startCol, startRows++); printf("%s           /%s\\__/%s\\/_/    /                %s",LGREEN, BROWN, LBLUE, RESET);
+    gotoxy(startCol, startRows++); printf("%s          |/\\\\         %s/                %s",LGREEN , LBLUE, RESET);
+    gotoxy(startCol, startRows++); printf("%s          %s/%s\\/%s/%s\\        \\                %s", RESET, LGREEN,YELLOW, LGREEN, LBLUE, RESET);
+    gotoxy(startCol, startRows++); printf("%s       __%s/%s/%s/%s__/\%s\\_______/                %s", RESET, LGREEN,YELLOW, LGREEN, DGRAY, LBLUE, RESET);
+    gotoxy(startCol, startRows++); printf("%s      | %s/%s/%s/%s_\\__/   \\ \\                    %s", RESET, LGREEN,YELLOW, LGREEN, DGRAY, RESET);
+    gotoxy(startCol, startRows++); printf("%s      |%s/%s/%s/          %s\\ \\                    %s", RESET, LGREEN,YELLOW, LGREEN, DGRAY, RESET);
+    gotoxy(startCol, startRows++); printf("%s      %s/%s/%s/           %s/_/                %s", RESET, LGREEN,YELLOW, LGREEN, DGRAY, RESET);
+    gotoxy(startCol, startRows++); printf("%s     %s|%s/%s/           %s/_/%s_                %s", RESET, LGREEN,YELLOW, LGREEN, DGRAY, RESET);
+	gotoxy(startCol, startRows++); printf("%s     %s\\/           %s|____\\            %s", RESET, LGREEN, RESET);
 }

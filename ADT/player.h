@@ -2,6 +2,7 @@
 #define PLAYER_H
 
 #include "card.h"
+#include "config.h"
 
 #define MAX_PLAYER_HEALTH 90
 #define MAX_PLAYER_ENERGY 3

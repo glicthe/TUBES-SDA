@@ -68,11 +68,19 @@
 // Menyisipkan pewarnaan karakter dengan ANSI
 #define RESET "\033[0m"
 #define RED "\033[0;31;40m"
+#define GREEN "\033[0;32;40m"
+#define GRAY "\033[37m"
 #define BLUE "\033[0;34;40m"
 #define CYAN "\033[0;36;40m"
 #define ORANGE "\033[38;5;208m"
 #define BROWN "\033[38;2;138;120;78m"
 #define YELLOW "\033[33m"
+#define DGRAY "\033[90m"
+#define LBLUE "\033[1;34;40m"
+#define LGREEN "\033[1;32;40m"
+#define LRED "\033[1;31m"
+#define LWHITE "\033[1;37m"
+#define LYELLOW "\033[1;33m"
 #define GRAY "\033[38;2;55;55;55m"
 #define BLUEI "\033[38;2;75;52;178m"
 
@@ -106,6 +114,7 @@ void setColorBrightWhite();
 void setColorDefault();
 void setColorHighlight();
 void setColorHighlight_Map();
+
 
 void playArrowBeep();
 void playEnterBeep();

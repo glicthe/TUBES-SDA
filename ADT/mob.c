@@ -331,18 +331,18 @@ void printMob(int startCol, int startRow, int columns, int rows, mobContainer C,
 	mobAddress current = firstMob(C);
 	
 	if (current != Nil) {
-		startCol = columns - 100;
+		startCol = columns - 125;
 		startRow = rows / 3;
 		while (current != Nil) {
 			i = 1;
 			if (!strcmp(mobType(current), "Goblin")) {
 				setColorLightCyan();
 				gotoxy(startCol, startRow + i); i++;
-				printf("  [%d] ", mobCounter(current));
+				printf(" [%d] ", mobCounter(current));
 				if (!state) setColorRed();
 				else setColorGreen();
 			} else if (!strcmp(mobType(current), "Ghost")) {
-				i = 6;
+				i = 1;
 				setColorLightCyan();
 				gotoxy(startCol, startRow + i); i++;
 				printf(" [%d] ", mobCounter(current));
@@ -356,33 +356,70 @@ void printMob(int startCol, int startRow, int columns, int rows, mobContainer C,
 	
 			if (!strcmp(mobType(current), "Goblin")){
 				gotoxy(startCol, startRow + i); i++;
-				printf(" .-^-. ");
+				printf("            _.._     \n");
 				gotoxy(startCol, startRow + i); i++;
-				printf("( @ @ )");
+				printf("     (`._.\"      \"._.')\n");
 				gotoxy(startCol, startRow + i); i++;
-				printf(" \\ V /");
+				printf("      '._          _.'              /\\\n");
 				gotoxy(startCol, startRow + i); i++;
-				printf(" .='=.");
+				printf("       | /`-.  .-'\\ |             .'.'\n");
 				gotoxy(startCol, startRow + i); i++;
-				printf("//\\_/\\\\");
+				printf("       |(_()_\\/_()_)| __         ( (\n");
 				gotoxy(startCol, startRow + i); i++;
-				printf("\\)|_|(/");
+				printf("       ;   ,____,   ;'  `\\        ) )\n");
 				gotoxy(startCol, startRow + i); i++;
-				printf("  /|\\");
+				printf("        \\  /VvvV\\  /    \\  \\.__   / /\n");
 				gotoxy(startCol, startRow + i); i++;
-				printf(" (/ \\)");
+				printf("      _/`'._----_.'      \\  \\  `\\/ /\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("     /  ._-_`--'     .----.  \\    /\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("    / _/      )     /  .------\\`.|  \n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("   / / |    ``    _,|  (_`-'_\\   \\\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("  / /   \\   \\`\"\"`    \\\\\\\\     \\   \\\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(" / / _   \\  /                 /`  /`\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("/ _\\/(    | |               ./  .'_\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("| ( \\  '--'  \\             .'  (__)'\\\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("\\\\\\\\ `-------'            /________.''\n");
 			} else if (!strcmp(mobType(current), "Ghost")) {
-				i = 6;
 				gotoxy(startCol, startRow + i); i++;
-				printf(" .-. ");
+				printf("   ^           ^\n");
 				gotoxy(startCol, startRow + i); i++;
-		    	printf("| OO|");
-		    	gotoxy(startCol, startRow + i); i++;
-		    	printf("|   |");
-		    	gotoxy(startCol, startRow + i); i++;
-		    	printf("'^^^'");
+				printf("  /(__.-----.__)\\\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(" (.`           `.) \n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(".`               `.\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(";   |\\       /|   ;\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(";   |X\\     /X|   :\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(":   |XX\\   /XX|   ;\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(";                 ;\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(":  |`.       .`|  ;\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(";  |--`|`.`|`--|  `,\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(":   | `.;;;.` |     ;._.--.  \n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("`.   |.-.-.-.|         _`-`\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf(" `;                   _-\n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("   ;                .- \n");
+				gotoxy(startCol, startRow + i); i++;
+				printf("    `.;`;`-;-`;-`;-`\n");
 			}
-			startCol += 21;
+			startCol += 35;
 			current = mobNext(current);
 		}
 	} 
@@ -404,3 +441,4 @@ void randGenerateMob(mobContainer *C){
 		makeMob -= 1;
 	}
 }
+
