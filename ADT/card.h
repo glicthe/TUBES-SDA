@@ -103,5 +103,8 @@ void printCards(int column, int row);
 void printAllCards(int cardCount);
 void displayCardAt(int startCol, int startRow);
 void displayCardIcon(cardAddress card, int cardNumber);
+void printDiscardText();
+void printDrawText();
+void printUpgradeText();
 
 #endif

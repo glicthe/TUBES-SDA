@@ -81,9 +81,9 @@
 #define LRED "\033[1;31m"
 #define LWHITE "\033[1;37m"
 #define LYELLOW "\033[1;33m"
-#define GRAY "\033[38;2;55;55;55m"
-#define BLUEI "\033[38;2;75;52;178m"
-
+#define GRAYII "\033[38;2;55;55;55m"
+#define BLUEII "\033[38;2;75;52;178m"
+#define PURPLE "\033[38;2;116;19;144m"
 
 // Fungsi utility
 HANDLE Out();

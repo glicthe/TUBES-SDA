@@ -225,6 +225,7 @@ void upgradeCard(cardDeck *D) {
     while (!exitUpgrade) {
     	clearScreen();
     	displayBorder();
+    	printUpgradeText();
     	showDrawPile(*D);
     	gotoxy(columns - 10, rows + 17);
     	if (isUpgrade){
@@ -545,6 +546,7 @@ void initDiscardToInventory(discardPile *P, cardDeck *D){
 void showDiscardPile(discardPile discard) {
 	clearScreen();
 	displayBorder();
+	printDiscardText();	
 	gotoxy(0, 0);
 		
 	int count = 0;
@@ -578,10 +580,7 @@ void showDiscardPile(discardPile discard) {
 }
 
 void showDrawPile(cardDeck deckInventory) {
-	clearScreen();
-	displayBorder();
 	gotoxy(0, 0);
-
 	int count = 0, cardInDeck = countDeck(deckInventory);
 	cardAddress currentDeck = deckHead(deckInventory);
 	
@@ -662,19 +661,19 @@ void printDrawIcon() {
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	int startCol = 7;
 	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 17;
-	gotoxy(startCol, startRows++); printf("%s                .:==.          ", RESET);
+	gotoxy(startCol, startRows++); printf("%s                %s.:==.          ", RESET, GRAYII);
 	gotoxy(startCol, startRows++); printf("        :++++-.  .. =-         ");
 	gotoxy(startCol, startRows++); printf("   :==:..-=:...  ---.=-        ");
-	gotoxy(startCol, startRows++); printf("-=-.:-=.   -####:    :.=:      ");
-	gotoxy(startCol, startRows++); printf("+==-.-..   .*####-.   : +      ");
-	gotoxy(startCol, startRows++); printf("==--..-     .#####:    :.+     ");    
-	gotoxy(startCol, startRows++); printf("  +==-.-.     +#####:   ..:+   ");
-	gotoxy(startCol, startRows++); printf("  :+-=: :.    .######.   .:=-  ");
-	gotoxy(startCol, startRows++); printf("    +===..+.    :###*:. .=:..+ ");
+	gotoxy(startCol, startRows++); printf("-=-.:-=.   %s-####:%s    :.=:      ", RED, GRAYII);
+	gotoxy(startCol, startRows++); printf("+==-.-..   %s.*####-.%s   : +      ", RED, GRAYII);
+	gotoxy(startCol, startRows++); printf("==--..-     %s.#####:%s    :.+     ", RED, GRAYII);    
+	gotoxy(startCol, startRows++); printf("  +==-.-.     %s+#####:%s   ..:+   ", RED, GRAYII);
+	gotoxy(startCol, startRows++); printf("  :+-=: :.    %s.######.%s   .:=-  ", RED, GRAYII);
+	gotoxy(startCol, startRows++); printf("    +===..+.    %s:###*:%s. .=:..+ ", RED, GRAYII);
 	gotoxy(startCol, startRows++); printf("     =-==..:+-...:-::...=*##*- ");
-	gotoxy(startCol, startRows++); printf("      -+-=Press [S] to-*+=-    ");
-	gotoxy(startCol, startRows++); printf("       -view Draw Pile         ");
-	gotoxy(startCol, startRows++); printf("        ++*+++-                ");
+	gotoxy(startCol, startRows++); printf("      -+-=%sPress [S] to%s-*+=-    ", RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("       -%sview Draw Pile         ", RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s        ++*+++-                %s", GRAYII, RESET);
 } 
 
 void printDiscardIcon() { // Size (32 , 14)
@@ -682,19 +681,19 @@ void printDiscardIcon() { // Size (32 , 14)
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) - 38;
 	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) - 17;
-	gotoxy(startCol, startRows++); printf("%s           -++=:               ", RESET);
+	gotoxy(startCol, startRows++); printf("%s           %s-++=:               ", RESET, GRAYII);
 	gotoxy(startCol, startRows++); printf("         *+=====+*****-        ");
-	gotoxy(startCol, startRows++); printf("        +++=   =#####*==+*+=   ");
-	gotoxy(startCol, startRows++); printf("      ++=*   ==**=      ==+=##-");
-	gotoxy(startCol, startRows++); printf("    -*=*  =@@@@@@@@@#+= #=####=");
-	gotoxy(startCol, startRows++); printf("   .*++   =@@#+=*#@@@##+=*###+ ");
-	gotoxy(startCol, startRows++); printf("  ++*=       ==#=#@@@++###*:   ");
-	gotoxy(startCol, startRows++); printf(" =*+##       ====*#@@#=####=   ");
-	gotoxy(startCol, startRows++); printf(".*==#@@#####@@@#@#+=#=####+    ");   
-	gotoxy(startCol, startRows++); printf(" :##########*+==+**=*###*:     ");
-	gotoxy(startCol, startRows++); printf("   .+*Press [A] to view*-      "); 
-	gotoxy(startCol, startRows++); printf("         Discard Pile#*=       "); 
-	gotoxy(startCol, startRows++); printf("              .-+***##=        ");
+	gotoxy(startCol, startRows++); printf("        +++=   %s=#####%s*==+*+=   ", PURPLE, GRAYII);
+	gotoxy(startCol, startRows++); printf("      ++=*   %s==**=%s      ==+=##-", PURPLE, GRAYII);
+	gotoxy(startCol, startRows++); printf("    -*=*  %s=@@@@@@@@@#+=%s #=####=", PURPLE, GRAYII);
+	gotoxy(startCol, startRows++); printf("   .*++   %s=@@#+=*#@@@##%s+=*###+ ", PURPLE, GRAYII);
+	gotoxy(startCol, startRows++); printf("  ++*=       %s==#=#@@@++%s###*:   ", PURPLE, GRAYII);
+	gotoxy(startCol, startRows++); printf(" =*+##      %s ====*#@@#%s=####=   ", PURPLE, GRAYII);
+	gotoxy(startCol, startRows++); printf(".*==#@@#####%s@@@#@#+=#%s=####+    ", PURPLE, GRAYII);   
+	gotoxy(startCol, startRows++); printf(" :##########*+==%s+**=*%s###*:     ", PURPLE, GRAYII);
+	gotoxy(startCol, startRows++); printf("   .+*%sPress [A] to view%s*-      ", RESET, GRAYII); 
+	gotoxy(startCol, startRows++); printf("         %sDiscard Pile%s#*=       ", RESET, GRAYII); 
+	gotoxy(startCol, startRows++); printf("              .-+***##=        %s", RESET);
 }
 
 void printCards(int column, int row) {
@@ -764,37 +763,78 @@ void displayCardIcon(cardAddress card, int cardNumber) {
 	setColorRed();
 	printf("[%d]", cardEffect(card));
 	
-    if (strcmp(card->type, "Attack") == 0){
-        setColorLightRed();
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("  ^  ");
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("  |  ");
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("._|_.");
-        gotoxy(startCol + 8, startRow + i); i++; i++;
-        printf("  I  ");
-    } else if (strcmp(card->type, "Shield") == 0){
-        setColorLightBlue();
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("<--->");
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("|_|_|");
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("|_|_|");
-        gotoxy(startCol + 8, startRow + i); i++; i++;
-        printf("\\|_|/");
-    } else if (strcmp(card->type, "Draw") == 0){
-        setColorYellow();
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("____+");
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("|  ||");
-        gotoxy(startCol + 8, startRow + i); i++;
-        printf("|  ||");
-        gotoxy(startCol + 8, startRow + i); i++; i++;
-        printf("|__||");
-    }
+	if (strcmp(cardName(card), "PowerSlash") == 0){
+		setColorLightRed();
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf("   ^\n");
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf("   |\n");
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf("._<O>_.\n");
+		gotoxy(startCol + 7, startRow + i); i++; i++;
+		printf("   I\n");
+	} else if (strcmp(cardName(card), "SuperSlash") == 0){
+		setColorLightRed();
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf("   ^\n");
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf("   |\n");
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf("._)*(_.\n");
+		gotoxy(startCol + 7, startRow + i); i++; i++;
+		printf("  `I`\n");
+	} else if (strcmp(cardName(card), "Insight") == 0){
+		setColorLightYellow();
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf("\\  |  /\n");
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf(" '.'.'\n");
+		gotoxy(startCol + 7, startRow + i); i++;
+		printf("~`(O)`~\n");
+		gotoxy(startCol + 7, startRow + i); i++; i++;
+		printf(" `-~-`\n");
+	} else if (strcmp(cardName(card), "IronWall") == 0) {
+		setColorLightBlue();
+		gotoxy(startCol + 4, startRow + i); i++;
+		printf("     /+\\\n");
+		gotoxy(startCol + 4, startRow + i); i++;
+		printf("   _/_|_\\_\n");
+		gotoxy(startCol + 4, startRow + i); i++;
+		printf(" _/_\\_|_/_\\_\n");
+		gotoxy(startCol + 4, startRow + i); i++; i++;
+		printf("/_\\_\\_|_/_/_\\\n");
+	} else if (strcmp(cardType(card), "Attack") == 0){
+    	setColorLightRed();
+		gotoxy(startCol + 8, startRow + i); i++;
+		printf("  ^  ");
+		gotoxy(startCol + 8, startRow + i); i++;
+		printf("  |  ");
+		gotoxy(startCol + 8, startRow + i); i++;
+    	printf("._|_.");
+    	gotoxy(startCol + 8, startRow + i); i++; i++;
+    	printf("  I  ");
+	} else if (strcmp(cardType(card), "Shield") == 0){
+		setColorLightBlue();
+		gotoxy(startCol + 8, startRow + i); i++;
+		printf("<--->");
+		gotoxy(startCol + 8, startRow + i); i++;
+	    printf("|_|_|");
+		gotoxy(startCol + 8, startRow + i); i++;
+	    printf("|_|_|");
+    	gotoxy(startCol + 8, startRow + i); i++; i++;
+	    printf("\\|_|/");
+	} else if (strcmp(cardType(card), "Draw") == 0){
+		setColorLightYellow();
+		gotoxy(startCol + 5, startRow + i); i++;
+		printf("  .-<<<-.\n");
+		gotoxy(startCol + 5, startRow + i); i++;
+		printf(" /       \\\n");
+		gotoxy(startCol + 5, startRow + i); i++;
+		printf(" \\       /\n");
+		gotoxy(startCol + 5, startRow + i); i++; i++;
+		printf("  `->>>-`\n");
+	} 
+    
 	gotoxy(startCol + 8, startRow + i); i++; 
     if (strlen(cardName(card)) > 5){
 	    strcpy(name, cardName(card));
@@ -813,5 +853,74 @@ void displayCardIcon(cardAddress card, int cardNumber) {
     	printf("%s", cardName(card));
 	}
 	setColorBrightWhite();
+}
+
+void printDiscardText() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 80;
+	int startRows = 3;
+
+	gotoxy(startCol, startRows++); printf("%s       ....             .       .x+=:.                                         ..      			    ....      ..        .          ..            ", RED);
+	gotoxy(startCol, startRows++); printf("   .xH888888Hx.        @88>    z`    ^%%                                      dF        			  +^\"\"888h. ~\"888h     @88>  x .d88\"             ");
+	gotoxy(startCol, startRows++); printf(" .H8888888888888:      %%8P        .   <k                          .u    .   '88bu.     			 8X.  ?8888X  8888f    %%8P    5888R                 ");
+	gotoxy(startCol, startRows++); printf(" 888*\"\"\"?\"\"*88888X      .       .@8Ned8\"       .         u      .d88B :@8c  '*88888bu  			'888x  8888X  8888~     .     '888R        .u   ");      
+	gotoxy(startCol, startRows++); printf("'f     d8x.   ^%%88k   .@88u   .@^%%8888\"   .udR88N     us888u.  =\"8888f8888r   ^\"*8888N 			'88888 8888X   \"88x:  .@88u    888R     ud8888.   "); 
+	gotoxy(startCol, startRows++); printf("'>    <88888X   '?8  ''888E` x88:  `)8b. <888'888k .@88 \"8888\"   4888>'88\"   beWE \"888L			 `8888 8888X  X88x.  ''888E`   888R   :888'8888.  ");
+	gotoxy(startCol, startRows++); printf(" `:..:`888888>    8>   888E  8888N=*8888 9888 'Y\"  9888  9888    4888> '     888E  888E			   `*` 8888X '88888X   888E    888R   d888 '88%%\"   ");
+	gotoxy(startCol, startRows++); printf("        `\"*88     X    888E   %%8\"    R88 9888      9888  9888    4888>       888E  888E			  ~`...8888X  \"88888   888E    888R   8888.+\"    ");
+	gotoxy(startCol, startRows++); printf("   .xHHhx..\"      !    888E    @8Wou 9%%  9888      9888  9888   .d888L .+    888E  888F			   x8888888X.   `%%8\"   888E    888R   8888L            "); 
+	gotoxy(startCol, startRows++); printf("  X88888888hx. ..!     888&  .888888P`   ?8888u../ 9888  9888   ^\"8888*\"    .888N..888 			  '%%\"*8888888h.   \"    888&   .888B . '8888c. .+     ");
+	gotoxy(startCol, startRows++); printf(" !   \"*888888888\"      R888\" `   ^\"F      \"8888P'  \"888*\"\"888\"     \"Y\"       `\"888*\"\"  			  ~    888888888!`     R888\"  ^*888%%   \"88888%%");        
+	gotoxy(startCol, startRows++); printf("        ^\"***\"`         \"\"                  \"P'     ^Y\"   ^Y'                   \"\"     			 X888^\"\"\"         \"\"      \"%%       \"YP'           ");
+	gotoxy(startCol, startRows++); printf("                                                                                                            `88f  ");
+	gotoxy(startCol, startRows++); printf("                                                                                                             88   ");
+	gotoxy(startCol, startRows++); printf("                                                                                                             \"\" %s", RESET);
+}
+
+void printDrawText() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 62;
+	int startRows = 3;
+	
+	gotoxy(startCol, startRows++); printf("%s       ....                                                                   ....      ..        .          ..  ", RED);
+	gotoxy(startCol, startRows++); printf("   .xH888888Hx.                                 x=~                         +^\"\"888h. ~\"888h     @88>  x .d88\"  ");     
+	gotoxy(startCol, startRows++); printf(" .H8888888888888:       .u    .                88x.   .e.   .e.            8X.  ?8888X  8888f    %%8P    5888R      ");
+	gotoxy(startCol, startRows++); printf(" 888*\"\"\"?\"\"*88888X    .d88B :@8c        u     '8888X.x888:.x888           '888x  8888X  8888~     .     '888R        .u      ");
+	gotoxy(startCol, startRows++); printf("'f     d8x.   ^%%88k  =\"8888f8888r    us888u.   `8888  888X '888k          '88888 8888X   \"88x:  .@88u    888R     ud8888.    ");
+	gotoxy(startCol, startRows++); printf("'>    <88888X   '?8    4888>'88\"  .@88 \"8888\"   X888  888X  888X           `8888 8888X  X88x.  ''888E`   888R   :888'8888. ");
+	gotoxy(startCol, startRows++); printf(" `:..:`888888>    8>   4888> '    9888  9888    X888  888X  888X             `*` 8888X '88888X   888E    888R   d888 '88%%\"   ");         
+	gotoxy(startCol, startRows++); printf("        `\"*88     X    4888>      9888  9888    X888  888X  888X            ~`...8888X  \"88888   888E    888R   8888.+\"  ");
+	gotoxy(startCol, startRows++); printf("   .xHHhx..\"      !   .d888L .+   9888  9888   .X888  888X. 888~             x8888888X.   `%%8\"   888E    888R   8888L     ");
+	gotoxy(startCol, startRows++); printf("  X88888888hx. ..!    ^\"8888*\"    9888  9888   `%%88%%``\"*888Y\"               '%%\"*8888888h.   \"    888&   .888B . '8888c. .+  ");
+	gotoxy(startCol, startRows++); printf(" !   \"*888888888\"        \"Y\"      \"888*\"\"888\"    `~     `\"                  ~    888888888!`     R888\"  ^*888%%   \"88888%% "); 
+	gotoxy(startCol, startRows++); printf("        ^\"***\"`                    ^Y\"   ^Y'                                     X888^\"\"\"         \"\"      \"%%       \"YP'    ");   
+	gotoxy(startCol, startRows++); printf("                                                                                 `88f ");                                                     
+	gotoxy(startCol, startRows++); printf("                                                                                  88   ");                                                    
+	gotoxy(startCol, startRows++); printf("                                                                                  \"\"  %s", RESET);                                        
+}
+
+void printUpgradeText() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 80;
+	int startRows = 3;
+	
+	gotoxy(startCol, startRows++); printf("%s                                                                        ..                                        ...                                      ..  ", RED);     
+	gotoxy(startCol, startRows++); printf("  x8h.     x8.                                                        dF                                       xH88\"`~ .x8X                              dF  ");
+	gotoxy(startCol, startRows++); printf(":88888> .x8888x.   .d``                        .u    .               '88bu.                                  :8888   .f\"8888Hf                .u    .   '88bu.         ");
+	gotoxy(startCol, startRows++); printf(" `8888   `8888f    @8Ne.   .u        uL      .d88B :@8c        u     '*88888bu        .u                    :8888>  X8L  ^\"\"`        u      .d88B :@8c  '*88888bu    ");
+	gotoxy(startCol, startRows++); printf("  8888    8888'    %%8888:u@88N   .ue888Nc.. =\"8888f8888r    us888u.    ^\"*8888N    ud8888.                  X8888  X888h          us888u.  =\"8888f8888r   ^\"*8888N     ");
+	gotoxy(startCol, startRows++); printf("  8888    8888      `888I  888. d88E`\"888E`   4888>'88\"  .@88 \"8888\"  beWE \"888L :888'8888.                 88888  !88888.     .@88 \"8888\"   4888>'88\"   beWE \"888L   ");
+	gotoxy(startCol, startRows++); printf("  8888    8888       888I  888I 888E  888E    4888> '    9888  9888   888E  888E d888 '88%%\"                 88888   %%88888     9888  9888    4888> '     888E  888E  ");
+	gotoxy(startCol, startRows++); printf("  8888    8888       888I  888I 888E  888E    4888>      9888  9888   888E  888E 8888.+\"                    88888 '> `8888>    9888  9888    4888>       888E  888E  ");
+	gotoxy(startCol, startRows++); printf("  8888    8888     uW888L  888' 888E  888E   .d888L .+   9888  9888   888E  888F 8888L                      `8888L %%  ?888   ! 9888  9888   .d888L .+    888E  888F ");
+	gotoxy(startCol, startRows++); printf("-n88888x>\"88888x- '*88888Nu88P  888& .888E   ^\"8888*\"    9888  9888  .888N..888  '8888c. .+                  `8888  `-*\"\"   /  9888  9888   ^\"8888*\"    .888N..888     ");
+	gotoxy(startCol, startRows++); printf("  `%%888\"  4888!`  ~ '88888F`    *888\" 888&      \"Y\"      \"888*\"\"888\"  `\"888*\"\"    \"88888%%                      \"888.      :\"   \"888*\"\"888\"     \"Y\"       `\"888*\"\"  ");
+	gotoxy(startCol, startRows++); printf("    `\"      \"\"       888 ^       `\"   \"888E               ^Y\"   ^Y'      \"\"         \"YP'                         `\"\"***~\"`      ^Y\"   ^Y'                   \"\"    ");
+	gotoxy(startCol, startRows++); printf("                     *8E        .dWi   `88E    ");                                                             
+	gotoxy(startCol, startRows++); printf("                     '8>        4888~  J8%%   ");                                                               
+	gotoxy(startCol, startRows++); printf("                      \"          ^\"===*\"` %s", RESET);                                                                   
 }
 
