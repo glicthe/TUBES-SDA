@@ -29,7 +29,7 @@ typedef struct Card {
 // ==========================
 // Deck as Doubly Linked List
 // ==========================
-typedef struct {
+typedef struct cardDeck{
     cardAddress head;
     cardAddress tail;
     cardAddress current;  // pointer ke kartu yang ditunjuk sekarang
@@ -70,12 +70,15 @@ void moveLeft(cardDeck *D);
 void moveRight(cardDeck *D);
 void moveToHead(cardDeck *D);
 void moveToTail(cardDeck *D);
-
 int countDeck(cardDeck D);
 
 
 // Remove (play card)
 cardAddress playCurrentCard(cardDeck *D);
+
+// Update
+void upgradeCard(cardDeck *D);
+void restartCard(cardDeck *D, cardDeck *H, discardPile *P);
 
 // Discard
 void initDiscard(discardPile *P);
@@ -98,5 +101,7 @@ void printDiscardIcon();
 void printDrawIcon();
 void printCards(int column, int row);
 void printAllCards(int cardCount);
+void displayCardAt(int startCol, int startRow);
+void displayCardIcon(cardAddress card, int cardNumber);
 
 #endif

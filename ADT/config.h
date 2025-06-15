@@ -73,6 +73,9 @@
 #define ORANGE "\033[38;5;208m"
 #define BROWN "\033[38;2;138;120;78m"
 #define YELLOW "\033[33m"
+#define GRAY "\033[38;2;55;55;55m"
+#define BLUEI "\033[38;2;75;52;178m"
+
 
 // Fungsi utility
 HANDLE Out();

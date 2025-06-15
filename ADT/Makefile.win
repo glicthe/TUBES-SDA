@@ -1,17 +1,17 @@
 # Project: BloodSpire
 # Makefile created by Dev-C++ 5.11
 
-CPP      = g++.exe
-CC       = gcc.exe
+CPP      = g++.exe -D__DEBUG__
+CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = main.o config.o mob.o boss.o menu.o display.o inGameLayout.o card.o player.o ../../docs/TUBES-SDA/ADT/map.o
-LINKOBJ  = main.o config.o mob.o boss.o menu.o display.o inGameLayout.o card.o player.o ../../docs/TUBES-SDA/ADT/map.o
-LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
+OBJ      = main.o config.o mob.o boss.o menu.o display.o inGameLayout.o card.o player.o map_display.o map_generator.o map_navigation.o
+LINKOBJ  = main.o config.o mob.o boss.o menu.o display.o inGameLayout.o card.o player.o map_display.o map_generator.o map_navigation.o
+LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -g3
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
 BIN      = BloodSpire.exe
-CXXFLAGS = $(CXXINCS) 
-CFLAGS   = $(INCS) 
+CXXFLAGS = $(CXXINCS) -g3
+CFLAGS   = $(INCS) -g3
 RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -51,5 +51,11 @@ card.o: card.c
 player.o: player.c
 	$(CC) -c player.c -o player.o $(CFLAGS)
 
-../../docs/TUBES-SDA/ADT/map.o: ../../docs/TUBES-SDA/ADT/map.c
-	$(CC) -c ../../docs/TUBES-SDA/ADT/map.c -o ../../docs/TUBES-SDA/ADT/map.o $(CFLAGS)
+map_display.o: map_display.c
+	$(CC) -c map_display.c -o map_display.o $(CFLAGS)
+
+map_generator.o: map_generator.c
+	$(CC) -c map_generator.c -o map_generator.o $(CFLAGS)
+
+map_navigation.o: map_navigation.c
+	$(CC) -c map_navigation.c -o map_navigation.o $(CFLAGS)
