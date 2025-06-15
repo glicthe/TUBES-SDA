@@ -35,5 +35,8 @@ void printRest();
 void printSmith();
 void highlightLeft();
 void highlightRight();
+void printSmithText();
+void printRestText();
+
 
 #endif 

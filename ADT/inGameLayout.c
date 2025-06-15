@@ -168,6 +168,9 @@ void inGame(int startCol, int startRow, int type, int depth){
 	            	system("pause");
 	            	break;
 	            case 's':
+	            	clearScreen();
+					displayBorder();
+					printDrawText();
 	            	showDrawPile(deckInventory);
 	            	system("pause");
 	            	break;
@@ -657,10 +660,12 @@ void restScreen(Player *player, cardDeck *deck) {
 			setColorBlue();
 			highlightLeft();
 			setColorWhite();
+			printRestText();
 		} else {
 			setColorBlue();
 			highlightRight();
 			setColorWhite();
+			printSmithText();
 		}
 	    
 		//Selection
@@ -734,68 +739,111 @@ void campFire() { //Size (61, 34)
     gotoxy(startCol, startRows++); printf("                         @@+###*@@@                          %s", RESET);
 }
 
+void printRestText() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 27;
+	int startRows = 3;
+	
+	gotoxy(startCol, startRows++); printf("%s     ..      ...                   .x+=:.        s    ", RED);
+	gotoxy(startCol, startRows++); printf("  :~\"8888x :\"%%888x                z`    ^%%      :8    ");
+	gotoxy(startCol, startRows++); printf(" 8    8888Xf  8888>                  .   <k    .88    ");
+	gotoxy(startCol, startRows++); printf("X88x. ?8888k  8888X       .u       .@8Ned8\"   :888ooo ");
+	gotoxy(startCol, startRows++); printf("'8888L'8888X  '%%88X    ud8888.   .@^%%8888\"  -*8888888 ");
+	gotoxy(startCol, startRows++); printf(" \"888X 8888X:xnHH(`` :888'8888. x88:  `)8b.   8888    ");
+	gotoxy(startCol, startRows++); printf("   ?8~ 8888X X8888   d888 '88%%\" 8888N=*8888   8888    ");
+	gotoxy(startCol, startRows++); printf(" -~`   8888> X8888   8888.+\"     %%8\"    R88   8888    ");
+	gotoxy(startCol, startRows++); printf(" :H8x  8888  X8888   8888L        @8Wou 9%%   .8888Lu= ");
+	gotoxy(startCol, startRows++); printf(" 8888> 888~  X8888   '8888c. .+ .888888P`    ^%%888*   ");
+	gotoxy(startCol, startRows++); printf(" 48\"` '8*~   `8888!`  \"88888%%   `   ^\"F        'Y\"    ");
+	gotoxy(startCol, startRows++); printf("  ^-==\"\"      `\"\"       \"YP'                          %s", RESET);
+}
+
 void printRest() { //Size (44, 24)
 	highlightLeft();
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 46;
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 45;
 	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2 - 13;
-	gotoxy(startCol, startRows++); printf("%s                            .:--::.              ", GRAY);
-	gotoxy(startCol, startRows++); printf("                      .*:.*#########*=.          ");
-	gotoxy(startCol, startRows++); printf("                       +*###############-.       ");
-	gotoxy(startCol, startRows++); printf("                       +#%s=::--==+%s*########+.  :. ", RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s                      .=:........::..::%s+####+:*- ", RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s                    .--:........::.........%s+##*: ", RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s                 .......::..:...-..........-%s###: ", RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s               .-==-:%s.........:::--........%s=++*: ", BLUEI, RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s             .===========-:%s..........::...--%s==*: ", BLUEI, RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s          .:===================::%s.......:--%s===*- ", BLUEI, RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s        .-=========================-:%s....::--%s=#- ", BLUEI, RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s      .-===============================-%s..:---%s*- ", BLUEI, RESET, GRAY);
-	gotoxy(startCol, startRows++); printf("%s=#+..%s:===============================++-..:%s. .*= ", GRAY, BLUEI, RESET);
-	gotoxy(startCol, startRows++); printf("%s.#=-*########**+%s===================++===...      ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s.################*%s===============++=====..       ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s.##################*+%s==========++=====-.         ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s:####################*==*#*%s==++=====-.           ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s:######################++#*%s=+=====-.             ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s:#########################*%s======:.              ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s:#=  :+*##################*%s====:                 ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s         .-+*#############*%s==-.                  ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s             ..-+#########*=:%s.                   ", GRAY, BLUEI);
-	gotoxy(startCol, startRows++); printf("%s                    :=*####.                     ", GRAY);
-	gotoxy(startCol, startRows++); printf("                        :*#                      %s", RESET);
+
+	gotoxy(startCol, startRows++); printf("%s                            .:--::.          ", GRAYII);
+	gotoxy(startCol, startRows++); printf("                      .*:.*#########*=.        ");
+	gotoxy(startCol, startRows++); printf("                       +*###############-.     ");
+	gotoxy(startCol, startRows++); printf("                       +#%s=::--==+%s*########+.  ", RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s                      .=:........::..::%s+####+:*", RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s                    .--:........::.........%s+##*", RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s                 .......::..:...-..........-%s###", RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s               .-==-:%s.........:::--........%s=++*", BLUEII, RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s             .===========-:%s..........::...--%s==*", BLUEII, RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s          .:===================::%s.......:--%s===*", BLUEII, RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s        .-=========================-:%s....::--%s=#", BLUEII, RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s      .-===============================-%s..:---%s*", BLUEII, RESET, GRAYII);
+	gotoxy(startCol, startRows++); printf("%s=#+..%s:===============================++-..:%s. .*", GRAYII, BLUEII, RESET);
+	gotoxy(startCol, startRows++); printf("%s.#=-*########**+%s===================++===...   ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s.################*%s===============++=====..    ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s.##################*+%s==========++=====-.      ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s:####################*==*#*%s==++=====-.        ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s:######################++#*%s=+=====-.          ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s:#########################*%s======:.           ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s:#=  :+*##################*%s====:              ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s         .-+*#############*%s==-.               ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s             ..-+#########*=:%s.                ", GRAYII, BLUEII);
+	gotoxy(startCol, startRows++); printf("%s                    :=*####.                  ", GRAYII);
+	gotoxy(startCol, startRows++); printf("                        :*#              %s", RESET);
+}
+
+void printSmithText() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 36;
+	int startRows = 3;
+	gotoxy(startCol, startRows++); printf("%s     ...                                .         s                ", RED);
+	gotoxy(startCol, startRows++); printf("   .x888888hx    :                       @88>      :8      .uef^\"    ");
+	gotoxy(startCol, startRows++); printf("  d88888888888hxx     ..    .     :      %%8P      .88    :d88E       ");
+	gotoxy(startCol, startRows++); printf(" 8\" ... `\"*8888%%`   .888: x888  x888.     .      :888ooo `888E       ");
+	gotoxy(startCol, startRows++); printf("!  \"   ` .xnxx.    ~`8888~'888X`?888f`  .@88u  -*8888888  888E .z8k  ");
+	gotoxy(startCol, startRows++); printf("X X   .H8888888%%:    X888  888X '888>  ''888E`   8888     888E~?888L ");
+	gotoxy(startCol, startRows++); printf("X 'hn8888888*\"   >   X888  888X '888>    888E    8888     888E  888E ");
+	gotoxy(startCol, startRows++); printf("X: `*88888%%`     !   X888  888X '888>    888E    8888     888E  888E ");
+	gotoxy(startCol, startRows++); printf("'8h.. ``     ..x8>   X888  888X '888>    888E   .8888Lu=  888E  888E ");
+	gotoxy(startCol, startRows++); printf(" `88888888888888f   \"*88%%\"\"*88\" '888!`   888&   ^%%888*    888E  888E ");
+	gotoxy(startCol, startRows++); printf("  '%%8888888888*\"      `~    \"    `\"`     R888\"    'Y\"    m888N= 888> ");
+	gotoxy(startCol, startRows++); printf("     ^\"****\"\"`                            \"\"              `Y\"   888  ");
+	gotoxy(startCol, startRows++); printf("                                                               J88\"  ");
+	gotoxy(startCol, startRows++); printf("                                                               @%%    ");
+	gotoxy(startCol, startRows++); printf("                                                             :\"      %s", RESET);
 }
 
 void printSmith() { //Size (44, 24)
 	highlightRight();
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 + 6;
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 + 7;
 	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2 - 13;
-	gotoxy(startCol, startRows++); printf("%s                                   .-:.               ", GRAY);
-	gotoxy(startCol, startRows++); printf("                                  :*###*:             ");
-	gotoxy(startCol, startRows++); printf("                                 =#######.            ");
-	gotoxy(startCol, startRows++); printf("                               .=######*:             ");
-	gotoxy(startCol, startRows++); printf("                               +######*:              ");
-	gotoxy(startCol, startRows++); printf("                              *#######%s=-::.           ", BROWN);
-	gotoxy(startCol, startRows++); printf("%s                             -#####*%s::=--::..        ", GRAY, BROWN);
-	gotoxy(startCol, startRows++); printf("%s                               :+##.    %s:=--:::.      ", GRAY, BROWN);
-	gotoxy(startCol, startRows++); printf("                                          .-=--:::.   ");
-	gotoxy(startCol, startRows++); printf("                                             :---:::. ");
-	gotoxy(startCol, startRows++); printf("                                               .-=--- ");
-	gotoxy(startCol, startRows++); printf("                                                 .::  ");
-	gotoxy(startCol, startRows++); printf("%s            .:::::::::::::::::::.  ", GRAY);
-	gotoxy(startCol, startRows++); printf("  +*=::-===+*==================#.  ");
-	gotoxy(startCol, startRows++); printf("   .+#######*################*+-   ");
-	gotoxy(startCol, startRows++); printf("      .:-=*#############*-.        ");
-	gotoxy(startCol, startRows++); printf("             :#########.           ");
-	gotoxy(startCol, startRows++); printf("              -#######=            ");
-	gotoxy(startCol, startRows++); printf("              *########.           ");
-	gotoxy(startCol, startRows++); printf("          .-*###########*=.        ");
-	gotoxy(startCol, startRows++); printf("         *##**==#####*=**###       ");
-	gotoxy(startCol, startRows++); printf("         *#####=.   .-######       ", RESET);
-}
 
+	gotoxy(startCol, startRows++); printf("%s                                  .-:.            ", GRAYII);
+	gotoxy(startCol, startRows++); printf("                                 :*###*:            ");
+	gotoxy(startCol, startRows++); printf("                                =#######.           ");
+	gotoxy(startCol, startRows++); printf("                              .=######*:            ");
+	gotoxy(startCol, startRows++); printf("                              +######*:             ");
+	gotoxy(startCol, startRows++); printf("                             *#######%s=-::.        ", BROWN);
+	gotoxy(startCol, startRows++); printf("%s                            -#####*%s::=--::..    ", GRAYII, BROWN);
+	gotoxy(startCol, startRows++); printf("%s                              :+##.    %s:=--:::. ", GRAYII, BROWN);
+	gotoxy(startCol, startRows++); printf("                                         .-=--:::.  ");
+	gotoxy(startCol, startRows++); printf("                                            :---:::.");
+	gotoxy(startCol, startRows++); printf("                                              .-=---");
+	gotoxy(startCol, startRows++); printf("                                                .:: ");
+	gotoxy(startCol, startRows++); printf("%s           .:::::::::::::::::::.  ", GRAYII);
+	gotoxy(startCol, startRows++); printf(" +*=::-===+*==================#.  ");
+	gotoxy(startCol, startRows++); printf("  .+#######*################*+-   ");
+	gotoxy(startCol, startRows++); printf("     .:-=*#############*-.        ");
+	gotoxy(startCol, startRows++); printf("            :#########.           ");
+	gotoxy(startCol, startRows++); printf("             -#######=            ");
+	gotoxy(startCol, startRows++); printf("             *########.           ");
+	gotoxy(startCol, startRows++); printf("         .-*###########*=.        ");
+	gotoxy(startCol, startRows++); printf("        *##**==#####*=**###       ");
+	gotoxy(startCol, startRows++); printf("        *#####=.   .-######       %s", RESET);
+}
 
 void printVictoryBanner() {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
