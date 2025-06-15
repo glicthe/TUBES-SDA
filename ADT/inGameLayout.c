@@ -246,10 +246,13 @@ void inGame(int startCol, int startRow, int type, int depth){
         goto PlayerTurn;
 	
 	Win:
-		
+		if (type == 1 || type == 2 || type == 3) {
+        showRewardScreen(&P, depth, type);
 		return;
 	Lose:
+		showLoseScreen();
 		SplashScreen();
+	}
 }
 
 void headBar(int startCol, int max, Player P, int turnCounter){
@@ -793,6 +796,369 @@ void printSmith() { //Size (44, 24)
 	gotoxy(startCol, startRows++); printf("         *#####=.   .-#####%       ");
 }
 
+
+void printVictoryBanner() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    int startX = (columns - 104) / 2;
+    int startY = 2;
+    
+	gotoxy(startX, startY++); printf("%s .--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--.%s\n", YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s/ .. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\%s\n", LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s\\ \\/\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ \\/ /%s\n", YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s \\/ /`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'\\/ / %s\n", LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s / /\\%s      _            .                   s                                            ..%s      %s/ /\\%s \n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s/ /\\ \\%s    u            @88>                :8                               ..          888B.%s   %s/ /\\ \\%s\n", LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s\\ \\/ /%s   88Nu.   u.    %%8P                .88           u.      .u    .    @L          48888E%s   %s\\ \\/ /%s\n", YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s \\/ /%s   '88888.o888c    .          .     :888ooo  ...ue888b   .d88B :@8c  9888i   .dL  '8888'%s    %s\\/ / %s\n", LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s / /\\%s    ^8888  8888  .@88u   .udR88N  -*8888888  888R Y888r =\"8888f8888r `Y888k:*888.  Y88F%s     %s/ /\\ %s\n", YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s/ /\\ \\%s    8888  8888 ''888E` <888'888k   8888     888R I888>   4888>'88\"    888E  888I  '88%s     %s/ /\\ \\%s\n", LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s\\ \\/ /%s    8888  8888   888E  9888 'Y\"    8888     888R I888>   4888> '      888E  888I   8F%s     %s\\ \\/ /%s\n", YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s \\/ /%s     8888  8888   888E  9888        8888     888R I888>   4888>        888E  888I   4%s       %s\\/ / %s\n", LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s / /\\%s    .8888b.888P   888E  9888       .8888Lu= u8888cJ888   .d888L .+     888E  888I   .%s       %s/ /\\ %s\n", YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s/ /\\ \\%s    ^Y8888*\"\"    888&  ?8888u../  ^%%888*    \"*888*P\"    ^\"8888*\"     x888N><888'  u8N.%s    %s/ /\\ \\%s\n", LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s\\ \\/ /%s      `Y\"        R888\"  \"8888P'     'Y\"       'Y\"          \"Y\"        \"88\"  888  \"*88%%%s    %s\\ \\/ /%s\n", YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s \\/ /%s                   \"\"      \"P'                                               88F    \"\"%s      %s\\/ / %s\n", LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s / /\\%s                                                                            98\"%s             %s/ /\\ %s\n", YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s/ /\\ \\%s                                                                         ./\"%s              %s/ /\\ \\%s\n", LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s\\ \\/ /%s                                                                        ~`%s                %s\\ \\/ /%s\n", YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s / /\\.--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--.\\/ /\\ %s\n", LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s/ /\\ \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\ /\\ \\%s\n", YELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'  /%s\n", LYELLOW, RESET);
+	gotoxy(startX, startY++); printf("%s `--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'` %s\n", YELLOW, RESET);
+
+    printf("%s", RESET);
+}
+
+void printRewardsClaimedBanner() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    int startX = (columns - 140) / 2;
+    int startY = 2;
+
+	gotoxy(startX+10, startY++); printf("%s .--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--. %s\n", YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s/ .. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\%s\n", LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s\\ \\/\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ \\/ /%s\n", YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s \\/ /`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'\\/ / %s\n", LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s / /\\%s                                                                          ..          .x+=:.     ..%s     %s/ /\\ %s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s/ /\\ \\%s                            x=~                                        dF           z`    ^%%   888B.%s  %s/ /\\ \\%s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s\\ \\/ /%s     .u    .               88x.   .e.   .e.                 .u    .   '88bu.           .   <k 48888E%s  %s\\ \\/ /%s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s \\/ /%s    .d88B :@8c       .u    '8888X.x888:.x888        u      .d88B :@8c  '*88888bu      .@8Ned8\" '8888'%s   %s\\/ / %s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s / /\\%s   =\"8888f8888r   ud8888.   `8888  888X '888k    us888u.  =\"8888f8888r   ^\"*8888N   .@^%%8888\"   Y88F%s    %s/ /\\ %s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s/ /\\ \\%s    4888>'88\"  :888'8888.   X888  888X  888X .@88 \"8888\"   4888>'88\"   beWE \"888L x88:  `)8b.  '88%s    %s/ /\\ \\%s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s\\ \\/ /%s    4888> '    d888 '88%%\"   X888  888X  888X 9888  9888    4888> '     888E  888E 8888N=*8888   8F%s    %s\\ \\/ /%s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s \\/ /%s     4888>      8888.+\"      X888  888X  888X 9888  9888    4888>       888E  888E  %%8\"    R88   4%s      %s\\/ / %s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s / /\\%s    .d888L .+   8888L       .X888  888X. 888~ 9888  9888   .d888L .+    888E  888F   @8Wou 9%%    .%s      %s/ /\\ %s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s/ /\\ \\%s   ^\"8888*\"    '8888c. .+  `%%88%%``\"*888Y\"    9888  9888   ^\"8888*\"    .888N..888  .888888P`    u8N.%s   %s/ /\\ \\%s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s\\ \\/ /%s      \"Y\"       \"88888%%      `~     `\"       \"888*\"\"888\"     \"Y\"       `\"888*\"\"   `   ^\"F     \"*88%%%s   %s\\ \\/ /%s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s \\/ /%s                   \"YP'                        ^Y\"   ^Y'                   \"\"                    \"\"%s     %s\\/ / %s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s / /\\.--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--./ /\\ %s\n", YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s/ /\\ \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\/\\ \\%s\n", LYELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `' /`' / %s\n", YELLOW, RESET);
+	gotoxy(startX+10, startY++); printf("%s `--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--' %s\n", LYELLOW, RESET);
+}
+
+void printLoserBanner() {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+
+    int startX = (columns - 80) / 2; 
+    int startY = 5;
+    int i = 0;
+    setColorLightRed();
+    
+	gotoxy(startX, startY + i++); printf("%s .--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--. \n", LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s/ .. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\%s\n", YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s\\ \\/\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ \\/ /%s\n", LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s \\/ /`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'\\/ / \n", YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s / /\\%s        ..                .x+=:.                             ..%s     %s/ /\\ %s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s/ /\\ \\%s x .d88\"                z`    ^%%                           888B.%s  %s/ /\\ \\%s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s\\ \\/ /%s  5888R          u.        .   <k               .u    .   48888E%s  %s\\ \\/ /%s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s \\/ /%s   '888R    ...ue888b     .@8Ned8\"      .u     .d88B :@8c  '8888'%s   %s\\/ / %s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s / /\\%s    888R    888R Y888r  .@^%%8888\"    ud8888.  =\"8888f8888r  Y88F%s    %s/ /\\ %s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s/ /\\ \\%s   888R    888R I888> x88:  `)8b. :888'8888.   4888>'88\"   '88%s    %s/ /\\ \\%s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s\\ \\/ /%s   888R    888R I888> 8888N=*8888 d888 '88%%\"   4888> '      8F%s    %s\\ \\/ /%s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s \\/ /%s    888R    888R I888>  %%8\"    R88 8888.+\"      4888>        4%s      %s\\/ / %s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s / /\\%s    888R   u8888cJ888    @8Wou 9%%  8888L       .d888L .+     .%s      %s/ /\\ %s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s/ /\\ \\%s  .888B .  \"*888*P\"   .888888P`   '8888c. .+  ^\"8888*\"     u8N.%s   %s/ /\\ \\%s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s\\ \\/ /%s  ^*888%%     'Y\"      `   ^\"F      \"88888%%       \"Y\"      \"*88%%%s   %s\\ \\/ /%s\n",LYELLOW, LRED, RESET, LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s \\/ /%s     \"%%                               \"YP'                   \"\"%s     %s\\/ / %s\n",YELLOW, LRED, RESET, YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s / /\\.--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--./ /\\ %s",  LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s/ /\\ \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\.. \\/\\ \\\n", YELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `'\\ `' /\n", LYELLOW, RESET);
+	gotoxy(startX, startY + i++); printf("%s `--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--'`--' \n", LYELLOW, RESET);	
+	
+    setColorDefault();	
+}
+
+
+void showLoseScreen() {
+    clearScreen();
+    displayBorder();
+    
+    printLoserBanner();
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    int textY = 30;
+    
+    const char* promptPart1 = "Press ";
+    const char* promptPart2 = "[ENTER]";
+    const char* promptPart3 = " to return to the Main Menu...";
+
+    int totalPromptWidth = strlen(promptPart1) + strlen(promptPart2) + strlen(promptPart3);
+    int promptStartX = (columns - totalPromptWidth) / 2;
+
+    gotoxy(promptStartX, textY);
+    setColorWhite();
+    printf("%s", promptPart1);
+    
+    setColorGreen();
+    printf("%s", promptPart2);
+    
+    setColorWhite();
+    printf("%s", promptPart3);
+    
+    setColorDefault();
+
+    while (getch() != KEY_ENTER) {
+    }
+}
+
+void printRewardSeparator_Top(int x, int y) {
+    setColorBrightWhite();
+    gotoxy(x, y);     printf("                                                  %s/\\", CYAN);
+    gotoxy(x, y + 1); printf("%s __                                               %s\\/                                               %s__", LYELLOW, CYAN, LYELLOW);
+    gotoxy(x, y + 2); printf("%s(_______________________________________________/\\/\\/\\_______________________________________________)", LYELLOW);
+    setColorDefault();
+}
+
+void printRewardSeparator_Bottom(int x, int y) {
+    setColorBrightWhite();
+    gotoxy(x, y);     printf(" %s_______________________________________________      _______________________________________________", LYELLOW);
+    gotoxy(x, y + 1); printf("%s(__                                             \\/\\/\\/                                             __)", LYELLOW);
+    gotoxy(x, y + 2); printf("                                                  %s/\\", CYAN);
+    gotoxy(x, y + 3); printf("                                                  %s\\/", CYAN);
+    setColorDefault();
+}
+
+void printTreasureChest(int x, int y) {
+    gotoxy(x, y++); printf("%s  __________", BROWN);
+    gotoxy(x, y++); printf("%s /\\____%s;;%s___\\", BROWN, RESET, BROWN);
+    gotoxy(x, y++); printf("%s |/         /", BROWN);
+    gotoxy(x, y++); printf("%s `.%s ())%so%so%s() %s.", BROWN, YELLOW, BLUE, RED, YELLOW, BROWN);
+    gotoxy(x, y++); printf("  %s|\\%s(%%%s()%s*^^%s()%s^\\", BROWN, YELLOW, GREEN, CYAN, YELLOW, BROWN);
+    gotoxy(x, y++); printf(" %s%%%s| |-%s%%%s-------|", YELLOW, BROWN, YELLOW, BROWN);
+    gotoxy(x, y++); printf("%s%% %s\\ |%s %%  %s))   %s|", YELLOW, BROWN, YELLOW, RESET, BROWN);
+    gotoxy(x, y++); printf("%s%%  %s\\|%s%%%s________%s|", YELLOW, BROWN, YELLOW, BROWN, BROWN);
+    gotoxy(x, y++); printf(" %s%%%%%%%s", YELLOW, RESET);
+}
+
+void showRewardScreen(Player *player, int depth, int type) {
+    int goldEarned = 0;
+    if (type == 2 || type == 3) { goldEarned = generateRandomRange(80, 100); } 
+    else { goldEarned = (10 + (5 * depth)) + generateRandomRange(-3, 3); }
+    player->gold += goldEarned;
+
+    cardAddress cardChoices[3];
+    int i;
+    for (i = 0; i < 3; i++) {
+        cardChoices[i] = generateRandomCard();
+    }
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    int rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+
+    int selectedIndex = 0;
+    bool cardChosen = false;
+    int key;
+
+    while (!cardChosen) {
+        clearScreen();
+        displayBorder();
+        
+        int layoutWidth = 103;
+        int layoutX = (columns - layoutWidth) / 2;
+        int currentY = 2; 
+
+        printVictoryBanner();
+        currentY = 27;
+
+        printRewardSeparator_Top(layoutX, currentY);
+        currentY += 4;
+
+        printTreasureChest(layoutX + (layoutWidth - 12) / 2, currentY);
+        currentY += 10;
+
+		char goldAmountStr[20];
+		sprintf(goldAmountStr, "%d Gold!", goldEarned);
+		const char* earnText = "You earned ";
+		int goldTextTotalWidth = strlen(earnText) + strlen(goldAmountStr);
+		
+		gotoxy(layoutX + (layoutWidth - goldTextTotalWidth) / 2, currentY++);
+		setColorWhite();
+		printf("%s", earnText);
+		setColorYellow();
+		printf("%s", goldAmountStr);
+		setColorDefault();
+		currentY++;
+		
+		int panjangGaris = 95;
+		int posisiXGaris = layoutX + (layoutWidth - panjangGaris) / 2;
+		
+		setColorLightYellow();
+		gotoxy(posisiXGaris, currentY++);
+		for(i = 0; i < panjangGaris; i++) printf("=");
+		currentY++;
+
+		const char* t1 = "Choose a ";
+		const char* t2 = "card";
+		const char* t3 = " to add to your ";
+		const char* t4 = "deck:";
+		int totalLen = strlen(t1) + strlen(t2) + strlen(t3) + strlen(t4);
+		
+		gotoxy(layoutX + (layoutWidth - totalLen) / 2, currentY++);
+		setColorWhite(); printf("%s", t1);
+		setColorCyan();  printf("%s", t2);
+		setColorWhite(); printf("%s", t3);
+		setColorGreen(); printf("%s", t4);
+		setColorDefault();
+		currentY += 2;
+
+        int cardsTotalWidth = (18 * 3) + (7 * 2);
+        int cardDisplayStartCol = layoutX + (layoutWidth - cardsTotalWidth) / 2;
+        for (i = 0; i < 3; i++) {
+            cardDeck singleCardDeck;
+            initDeck(&singleCardDeck);
+            deckHead(singleCardDeck) = cardChoices[i];
+            deckTail(singleCardDeck) = cardChoices[i];
+            currentCard(singleCardDeck) = (i == selectedIndex) ? cardChoices[i] : NULL;
+            printDeck(singleCardDeck, cardDisplayStartCol + (i * 25), currentY);
+        }
+        currentY += 14;
+
+        currentY += 2;
+
+        const char* promptPart1 = "Use Left/Right Arrow to navigate. Press ";
+        const char* promptPart2 = "[ENTER]";
+        const char* promptPart3 = " to choose.";
+        int totalPromptWidth = strlen(promptPart1) + strlen(promptPart2) + strlen(promptPart3);
+        int promptStartX = layoutX + (layoutWidth - totalPromptWidth) / 2;
+
+        gotoxy(promptStartX, currentY);
+        setColorWhite(); printf("%s", promptPart1);
+        setColorGreen(); printf("%s", promptPart2);
+        setColorWhite(); printf("%s", promptPart3);
+        setColorDefault();
+        currentY++;
+        
+        currentY += 2;
+        printRewardSeparator_Bottom(layoutX, currentY);
+        
+        key = getch();
+        if (key == 224) {
+            key = getch();
+            playArrowBeep();
+            if(key == KEY_LEFT) selectedIndex = (selectedIndex - 1 + 3) % 3;
+            if(key == KEY_RIGHT) selectedIndex = (selectedIndex + 1) % 3;
+        } else if (key == KEY_ENTER) {
+            playEnterBeep();
+            cardChosen = true;
+        }
+    }
+
+    for (i = 0; i < 3; i++) {
+        if (i == selectedIndex) pushDiscard(&(player->discard), cardChoices[i]);
+        else freeCard(cardChoices[i]);
+    }
+
+    clearScreen();
+    displayBorder();
+
+    int layoutWidth = 140;
+    int layoutX = (columns - layoutWidth) / 2;
+    int currentY = 2;
+
+    printRewardsClaimedBanner();
+    currentY = 25; 
+
+    int separatorWidth = 103;
+    int separatorX = layoutX + (layoutWidth - separatorWidth) / 2;
+    printRewardSeparator_Top(separatorX, currentY);
+
+    int contentY = currentY + 3 + 3;
+    int chestWidth = 12;
+    int cardWidth = 18;
+    int gap = 6;
+    int totalContentWidth = chestWidth + gap + cardWidth;
+    int contentStartX = layoutX + (layoutWidth - totalContentWidth) / 2;
+    int chestX = contentStartX;
+    int cardX = chestX + chestWidth + gap;
+    
+    printTreasureChest(chestX, contentY);
+    cardAddress chosenCard = cardChoices[selectedIndex];
+    cardDeck displayDeck;
+    initDeck(&displayDeck);
+    deckHead(displayDeck) = chosenCard;
+    deckTail(displayDeck) = chosenCard;
+    currentCard(displayDeck) = chosenCard;
+    printDeck(displayDeck, cardX, contentY);
+
+    int cardHeight = 13;
+    int textY = contentY + cardHeight + 2;
+
+    char goldInfoStr[50];
+    sprintf(goldInfoStr, "You earned %d Gold.", goldEarned);
+    int goldInfoWidth = strlen(goldInfoStr);
+    gotoxy(layoutX + (layoutWidth - goldInfoWidth) / 2, textY++);
+    setColorWhite();
+    printf("You earned ");
+    setColorYellow();
+    printf("%d Gold.", goldEarned);
+    setColorDefault();
+    textY++;
+
+    const char* textPart1 = "Card ";
+    const char* textPart3 = " has been added to your deck!";
+    char cardNameStr[50];
+    sprintf(cardNameStr, "'%s'", cardName(chosenCard));
+    int totalCardTextWidth = strlen(textPart1) + strlen(cardNameStr) + strlen(textPart3);
+    int cardTextStartX = layoutX + (layoutWidth - totalCardTextWidth) / 2;
+    gotoxy(cardTextStartX, textY++);
+    setColorWhite(); printf("%s", textPart1);
+    setColorCyan(); printf("%s", cardNameStr);
+    setColorWhite(); printf("%s", textPart3);
+    setColorDefault();
+    textY += 2;
+
+    const char* promptPart1_ = "Press ";
+    const char* promptPart2_ = "[ENTER]";
+    const char* promptPart3_ = " to return to the map...";
+    int totalPromptWidth = strlen(promptPart1_) + strlen(promptPart2_) + strlen(promptPart3_);
+    int promptStartX = layoutX + (layoutWidth - totalPromptWidth) / 2;
+    gotoxy(promptStartX, textY++);
+    setColorWhite(); printf("%s", promptPart1_);
+    setColorGreen(); printf("%s", promptPart2_);
+    setColorWhite(); printf("%s", promptPart3_);
+    setColorDefault();
+    
+    int bottomSeparatorY = textY + 2;
+    printRewardSeparator_Bottom(separatorX, bottomSeparatorY);
+
+    while (getch() != KEY_ENTER) {
+    }
+}
+
 void highlightLeft() {
 	int length, startCol, startRow;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -868,4 +1234,3 @@ void proceedLabel(){ //Size (33, 7)
 	gotoxy(startCol, startRow++); printf("  \\ 		            		");
 	gotoxy(startCol, startRow++); printf("   \\===========================");
 }
-

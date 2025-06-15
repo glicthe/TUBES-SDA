@@ -10,6 +10,14 @@ void showMobPlayer(Boss* boss, mobContainer C, int columns, int rows, boolean st
 
 // Play
 void playCard(Player *P, cardDeck *Inventory, mobContainer *C, Boss* boss);
+void showRewardScreen(Player *player, int depth, int type);
+void printVictoryBanner();
+void printRewardsClaimedBanner();
+void printTreasureChest(int x, int y);
+void printRewardSeparator_Top(int x, int y);
+void printRewardSeparator_Bottom(int x, int y);
+void printLoserBanner();
+void showLoseScreen();
 
 // Merchant
 void merchantScreen(Player *player, cardDeck *inventory);

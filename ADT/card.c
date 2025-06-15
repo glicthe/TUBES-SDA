@@ -232,7 +232,47 @@ void printDeck(cardDeck D, int startCol, int startRow) {
 		setColorYellow();
 		printf("[%d]", cardCost(temp));
 		i = 3;
-		if (strcmp(cardType(temp), "Attack") == 0){
+		if (strcmp(cardName(temp), "PowerSlash") == 0){
+			setColorLightRed();
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf("   ^\n");
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf("   |\n");
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf("._<O>_.\n");
+			gotoxy(startCol + 5, startRow + i); i++; i++;
+			printf("   I\n");
+		} else if (strcmp(cardName(temp), "SuperSlash") == 0){
+			setColorLightRed();
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf("   ^\n");
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf("   |\n");
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf("._)*(_.\n");
+			gotoxy(startCol + 5, startRow + i); i++; i++;
+			printf("  `I`\n");
+		} else if (strcmp(cardName(temp), "Insight") == 0){
+			setColorLightYellow();
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf("\\  |  /\n");
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf(" '.'.'\n");
+			gotoxy(startCol + 5, startRow + i); i++;
+			printf("~`(O)`~\n");
+			gotoxy(startCol + 5, startRow + i); i++; i++;
+			printf(" `-~-`\n");
+		} else if (strcmp(cardName(temp), "IronWall") == 0) {
+			setColorLightBlue();
+			gotoxy(startCol + 2, startRow + i); i++;
+			printf("     /+\\\n");
+			gotoxy(startCol + 2, startRow + i); i++;
+			printf("   _/_|_\\_\n");
+			gotoxy(startCol + 2, startRow + i); i++;
+			printf(" _/_\\_|_/_\\_\n");
+			gotoxy(startCol + 2, startRow + i); i++; i++;
+			printf("/_\\_\\_|_/_/_\\\n");
+		} else if (strcmp(cardType(temp), "Attack") == 0){
 	    	setColorLightRed();
 			gotoxy(startCol + 6, startRow + i); i++;
 			printf("  ^  ");
@@ -252,29 +292,44 @@ void printDeck(cardDeck D, int startCol, int startRow) {
 		    printf("|_|_|");
 	    	gotoxy(startCol + 6, startRow + i); i++; i++;
 		    printf("\\|_|/");
-		}
-		gotoxy(startCol + 6, startRow + i); i++; 
-	    if (strlen(cardName(temp)) > 5){
-		    strcpy(name, cardName(temp));
-		    j = 0;
-		    
-		    while(j < strlen(name) && j < 10) {
-		        if (j > 0 && isupper(name[j])) {
-		            // Found uppercase after first character, move to next line
-		            gotoxy(startCol + 6, startRow + i); 
-		            i++;
-		        }
-		        printf("%c", name[j]);
-		        j++;
-		    }
+		} else if (strcmp(cardType(temp), "Draw") == 0){
+			setColorLightYellow();
+			gotoxy(startCol + 3, startRow + i); i++;
+			printf("  .-<<<-.\n");
+			gotoxy(startCol + 3, startRow + i); i++;
+			printf(" /       \\\n");
+			gotoxy(startCol + 3, startRow + i); i++;
+			printf(" \\       /\n");
+			gotoxy(startCol + 3, startRow + i); i++; i++;
+			printf("  `->>>-`\n");
+		} 
+		        int nameX_offset;
+		if (strcmp(cardName(temp), "Insight") == 0) {
+			nameX_offset = 5;
 		} else {
-	    printf("%s", cardName(temp));
+			nameX_offset = 6;
 		}
 		
-		gotoxy(startCol + boxTopBot - 2, startRow + boxLeftRight);
-		setColorRed();
-		printf("[%d]", cardEffect(temp));
-		setColorBrightWhite();
+		gotoxy(startCol + nameX_offset, startRow + i); i++;
+        if (strlen(cardName(temp)) > 5){
+            strcpy(name, cardName(temp));
+            j = 0;
+            
+            while(j < strlen(name) && j < 10) {
+                if (j > 0 && isupper(name[j])) {
+                    gotoxy(startCol + nameX_offset, startRow + i); 
+                    i++;
+                }
+                printf("%c", name[j]);
+                j++;
+            }
+        } else {
+            printf("%s", cardName(temp));
+        }
+        gotoxy(startCol + boxTopBot - 2, startRow + boxLeftRight);
+        setColorRed();
+        printf("[%d]", cardEffect(temp));
+        setColorBrightWhite();
         startCol += (boxTopBot + 5);
         countCard++;
         temp = cardNext(temp);
