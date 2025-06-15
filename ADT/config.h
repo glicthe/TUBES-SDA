@@ -94,6 +94,7 @@ void showCursor();
 void setTextColor(int color);
 int randNumGenerator();
 int generateRandomRange(int min, int max);
+extern boolean g_isGameActive;
 
 // Fungsi-fungsi warna
 void setColorRed();

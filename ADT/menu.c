@@ -1,6 +1,5 @@
 #include "menu.h"
 
-// Fungsi untuk menampilkan menu dengan design yang diperbaiki
 void displayMenu(MenuItem menu[], int menuSize, int selectedIndex) {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns, rows;
@@ -14,32 +13,30 @@ void displayMenu(MenuItem menu[], int menuSize, int selectedIndex) {
     displayBorder();
     displayGameTitle();
 
-    int menuWidth = 40; // Lebar menu yang digunakan untuk kalkulasi padding
-    int textWidth = 38; // Lebar efektif untuk teks di dalam pipa "| text |"
+    int menuWidth = 40; 
+    int textWidth = 38;
     int startRow = 28;
     int startCol = (columns - menuWidth) / 2;
 
     if (startCol < 3) startCol = 3;
     if (startCol + menuWidth > columns - 3) startCol = columns - menuWidth - 3;
 
-    // --- Definisi Atribut Warna Tema Naga & Medieval (DIPERBARUI) ---
+
     const int FRAME_COLOR_ATTR = COLOR_RED;
-    const int HEADER_FRAME_ATTR = (COLOR_BLACK * 16) + COLOR_LIGHT_YELLOW; // Kuning terang di atas hitam
+    const int HEADER_FRAME_ATTR = (COLOR_BLACK * 16) + COLOR_LIGHT_YELLOW;
     const int HEADER_TEXT_BG_ATTR = (COLOR_RED * 16) + COLOR_LIGHT_YELLOW;
     const int INSTRUCTION_KEY_ATTR = COLOR_LIGHT_RED;
     const int INSTRUCTION_NORMAL_TEXT_ATTR = COLOR_WHITE;
     const int ITEM_NORMAL_TEXT_ATTR = COLOR_WHITE;
     const int ITEM_SELECTED_ATTR = (COLOR_LIGHT_YELLOW * 16) + COLOR_BLACK;
-    // const int STATUS_TEXT_ATTR = COLOR_LIGHT_YELLOW; // Tidak digunakan secara umum lagi, dipecah
-    const int STATUS_LITERAL_ATTR = (COLOR_BLACK * 16) + COLOR_WHITE;      // "Selected: " Putih di atas Hitam
-    const int STATUS_ITEMNAME_ATTR = (COLOR_BLACK * 16) + COLOR_LIGHT_RED; // Nama item Merah Terang di atas Hitam
-    const int DECORATION_STAR_ATTR = COLOR_GREEN;       // Untuk <*> Hijau Tua
-    const int DECORATION_SLASH_ATTR = COLOR_MAGENTA;    // Untuk /|\ Magenta
+    const int STATUS_LITERAL_ATTR = (COLOR_BLACK * 16) + COLOR_WHITE; 
+    const int STATUS_ITEMNAME_ATTR = (COLOR_BLACK * 16) + COLOR_LIGHT_RED;
+    const int DECORATION_STAR_ATTR = COLOR_GREEN;    
+    const int DECORATION_SLASH_ATTR = COLOR_MAGENTA;    
     const int INSTRUCTION_LOWER_BORDER_ATTR = HEADER_FRAME_ATTR;
-    const int BLACK_BG_WHITE_FG_FOR_PADDING = (COLOR_BLACK * 16) + COLOR_WHITE; // Untuk spasi padding di status box
-    // --- Akhir Definisi Atribut Warna ---
+    const int BLACK_BG_WHITE_FG_FOR_PADDING = (COLOR_BLACK * 16) + COLOR_WHITE;
 
-    // Menu header
+
     setTextColor(HEADER_FRAME_ATTR);
     gotoxy(startCol, startRow);
     printf("+======================================+");
@@ -52,7 +49,6 @@ void displayMenu(MenuItem menu[], int menuSize, int selectedIndex) {
     gotoxy(startCol, startRow + 2);
     printf("+======================================+");
 
-    // Baris Instruksi
     gotoxy(startCol, startRow + 3);
     setTextColor(FRAME_COLOR_ATTR); printf("|");
     setTextColor(INSTRUCTION_NORMAL_TEXT_ATTR); printf("      Use     ");
@@ -106,7 +102,6 @@ void displayMenu(MenuItem menu[], int menuSize, int selectedIndex) {
     gotoxy(startCol, startRow + 8 + menuSize);
     printf("+======================================+");
 
-    // --- Status information dengan Bingkai Baru dan Warna Teks Terpisah ---
     int statusBoxY = startRow + 9 + menuSize;
 
     setTextColor(HEADER_FRAME_ATTR);
@@ -115,7 +110,7 @@ void displayMenu(MenuItem menu[], int menuSize, int selectedIndex) {
 
     gotoxy(startCol, statusBoxY + 1);
     char selectedItemText[50];
-    strcpy(selectedItemText, menu[selectedIndex].text); // Salin nama item
+    strcpy(selectedItemText, menu[selectedIndex].text);
 
     char statusLiteral[] = "Selected: ";
     int statusLiteralLen = strlen(statusLiteral);
@@ -124,31 +119,28 @@ void displayMenu(MenuItem menu[], int menuSize, int selectedIndex) {
     int statusPadding = (textWidth - totalTextLen) / 2;
     if (statusPadding < 0) statusPadding = 0;
 
-    setTextColor(HEADER_FRAME_ATTR); printf("|"); // Pipa kiri
+    setTextColor(HEADER_FRAME_ATTR); printf("|");
 
-    // Spasi padding kiri (latar hitam dari HEADER_FRAME_ATTR)
     int k;
     for(k=0; k < statusPadding; ++k) { printf(" "); }
 
-    setTextColor(STATUS_LITERAL_ATTR); // "Selected: " Putih di atas Hitam
+    setTextColor(STATUS_LITERAL_ATTR);
     printf("%s", statusLiteral);
 
-    setTextColor(STATUS_ITEMNAME_ATTR); // Nama item Merah Terang di atas Hitam
+    setTextColor(STATUS_ITEMNAME_ATTR);
     printf("%s", selectedItemText);
 
-    // Spasi padding kanan (latar hitam dari HEADER_FRAME_ATTR)
     int remainingSpaces = textWidth - totalTextLen - statusPadding;
     for(k=0; k < remainingSpaces; ++k) { printf(" "); }
 
-    setTextColor(HEADER_FRAME_ATTR); printf("|"); // Pipa kanan
+    setTextColor(HEADER_FRAME_ATTR); printf("|");
 
     setTextColor(HEADER_FRAME_ATTR);
     gotoxy(startCol, statusBoxY + 2);
     printf("+======================================+");
-    // --- Akhir Status Information ---
+    
 
 
-    // Additional decorative elements (Warna <*> diubah)
     if (startCol >= 13) {
         gotoxy(startCol - 8, startRow + 2);
         setTextColor(DECORATION_STAR_ATTR); // <*> Hijau Tua
@@ -170,7 +162,6 @@ void displayMenu(MenuItem menu[], int menuSize, int selectedIndex) {
     setColorDefault();
 }
 
-// Fungsi untuk menjalankan aksi menu
 void executeMenuAction(int menuId) {
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns, rows;
@@ -269,16 +260,12 @@ void executeMenuAction(int menuId) {
     printf("  Press ENTER to return to main menu...");
     setColorDefault();
     
-    // Tunggu sampai tombol ENTER ditekan
     while (getch() != KEY_ENTER);
 }
 
-// Fungsi untuk menampilkan splash screen
 void SplashScreen() {
-    // Maximize console window
     Sleep(800);
     
-    // Inisialisasi menu items
     MenuItem menu[] = {
         {"New Game", 1},
         {"Load Game", 2},
@@ -292,7 +279,6 @@ void SplashScreen() {
     int key;
     int running = 1;
     
-    // Deklarasi variabel untuk ukuran console
     CONSOLE_SCREEN_BUFFER_INFO csbi;
     int columns = 0;
     int rows = 0;
@@ -310,8 +296,8 @@ void SplashScreen() {
         
         int availableWidth = columns - 4;
         int promptStartCol = 2 + (availableWidth - 40) / 2;
-        // Mengubah posisi tulisan ke atas, tepat setelah title
-        gotoxy(promptStartCol, 30); // Mengubah dari rows - 5 menjadi 20
+
+        gotoxy(promptStartCol, 30);
         setColorLightYellow();
         printf("Press ENTER to continue...");
         setColorDefault();
@@ -427,7 +413,6 @@ void howToPlay() {
 	
 	while (1) {
 		if (currentPage == 1) {
-			// First page - Header and basic controls
 			clearScreen();
 			displayBorder();
 			
@@ -534,7 +519,6 @@ void howToPlay() {
 			gotoxy(startCol, startRow + i); i++;
 			printf("\033[31;103m [ESC] \033[0m	==>	\033[1;34mPress\033[0m \033[1;33;100m'ESC'\033[0m to return");
 		} else if (currentPage == 2) {
-			// Second page - Card mechanics
 			clearScreen();
 			displayBorder();
 			startCol = columns / 3 - 26;
@@ -670,7 +654,7 @@ void howToPlay() {
 
 void startGame() {
 	MapNode* gameMap;
-
+    g_isGameActive = true;
     srand(time(0));
     hideCursor();
 
@@ -681,15 +665,12 @@ void startGame() {
     } else {
         clearScreen();
         gotoxy(0,0);
-        printf("ERROR: Gagal membuat peta.\n");
+        printf("ERROR: Failed to generate map.\n");
         Sleep(2000);
     }
 
     clearScreen();
     gotoxy(0,5);
-    printf("\nMembebaskan memori...\n");
     freeMapTree(gameMap);
-    printf("Memori berhasil dibebaskan.\n\n");
-    printf("Simulasi Selesai. Terima kasih!\n\n");
-    showCursor();
 }
+

@@ -5,6 +5,9 @@
 #include "config.h"
 
 void drawMapView(MapNode* activeNode, int selected_child_idx);
+void printMapSeparator_Top(int x, int y);
+void printMapSeparator_Bottom(int x, int y);
+void pembatas(int y_pos, int console_width, int line_length);
 
 void applyNodeColor(MapNode* node, boolean isPlayer, boolean isSelected, boolean isGrandchild);
 void printPaddedNode(MapNode* node, int width, boolean isPlayer, boolean isSelected, boolean isGrandchild);

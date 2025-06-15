@@ -51,6 +51,8 @@ int generateRandomRange(int min, int max) {
     return value;
 }
 
+boolean g_isGameActive;
+
 void setTextColor(int color) {
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
 }

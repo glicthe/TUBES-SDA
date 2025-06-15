@@ -7,7 +7,7 @@ void drawMapView(MapNode* activeNode, int selectedIndex) {
 
     if (activeNode == Nil) {
         gotoxy(MAP_START_X, currentY);
-        printf("   Node aktif tidak ada.\n");
+        printf("   No active node.\n");
         return;
     }
 
@@ -41,10 +41,10 @@ void drawMapView(MapNode* activeNode, int selectedIndex) {
         drawPattern_Single_Child(activeNode, selectedIndex, &currentY);
     } else {
         gotoxy(MAP_START_X, currentY++);
-        printf("                 (Visualisasi default tidak tersedia)\n");
+        printf("                 (Default visualization not available)\n");
         if (activeNode->numChildren > 0) {
             gotoxy(MAP_START_X, currentY++);
-            printf("                 Jalur: ");
+            printf("                 Paths: ");
             for (i = 0; i < activeNode->numChildren; ++i) {
                 applyNodeColor(activeNode->children[i], FALSE, (i == selectedIndex), FALSE);
                 printf("[%s] ", NODE_TYPE_NAMES[activeNode->children[i]->type]);
@@ -470,6 +470,35 @@ void drawPattern_D2_S0_Children(MapNode* activeNode, int selectedIndex, int* cur
     }
 }
 
+void pembatas(int y_pos, int console_width, int line_length) {
+    int startX = (console_width - line_length) / 2;
+    int i;
+
+    gotoxy(startX, y_pos);
+    setColorLightYellow();
+    for (i = 0; i < line_length; i++) {
+        printf("-");
+    }
+    setColorDefault();
+}
+
+void printMapSeparator_Top(int x, int y) {
+    setColorBrightWhite();
+    gotoxy(x, y);     printf("                                                                                      %s/\\", CYAN);
+    gotoxy(x, y + 1); printf("%s __                                                                                   %s\\/                                                                                   %s__", LYELLOW, CYAN, LYELLOW);
+    gotoxy(x, y + 2); printf("%s(___________________________________________________________________________________/\\/\\/\\___________________________________________________________________________________)", LYELLOW);
+    setColorDefault();
+}
+
+void printMapSeparator_Bottom(int x, int y) {
+    setColorBrightWhite();
+    gotoxy(x, y);     printf(" %s___________________________________________________________________________________      ___________________________________________________________________________________", LYELLOW);
+    gotoxy(x, y + 1); printf("%s(__                                                                                 \\/\\/\\/                                                                                 __)", LYELLOW);
+    gotoxy(x, y + 2); printf("                                                                                      %s/\\", CYAN);
+    gotoxy(x, y + 3); printf("                                                                                      %s\\/", CYAN);
+    setColorDefault();
+}
+
 void drawPattern_D4_Boss(MapNode* activeNode, int selectedIndex, int* currentY) {
     MapNode *l1c0, *l1c1, *l1c2;
     MapNode *l2gc[3] = {Nil};
@@ -522,4 +551,5 @@ void drawPattern_Single_Child(MapNode* activeNode, int selectedIndex, int* curre
 		printf("\n");
 		(*currentY)++;
     }
+    
 }
