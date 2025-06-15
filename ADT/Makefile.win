@@ -4,14 +4,14 @@
 CPP      = g++.exe -D__DEBUG__
 CC       = gcc.exe -D__DEBUG__
 WINDRES  = windres.exe
-OBJ      = boss.o card.o config.o display.o inGameLayout.o loadGame.o main.o map_display.o map_generator.o map_navigation.o menu.o mob.o player.o
-LINKOBJ  = boss.o card.o config.o display.o inGameLayout.o loadGame.o main.o map_display.o map_generator.o map_navigation.o menu.o mob.o player.o
+OBJ      = main.o config.o mob.o boss.o menu.o display.o inGameLayout.o card.o player.o map_display.o map_generator.o map_navigation.o
+LINKOBJ  = main.o config.o mob.o boss.o menu.o display.o inGameLayout.o card.o player.o map_display.o map_generator.o map_navigation.o
 LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -g3
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++"
 BIN      = BloodSpire.exe
-CXXFLAGS = $(CXXINCS) -g3 -g
-CFLAGS   = $(INCS) -g3 -g
+CXXFLAGS = $(CXXINCS) -g3
+CFLAGS   = $(INCS) -g3
 RM       = rm.exe -f
 
 .PHONY: all all-before all-after clean clean-custom
@@ -24,14 +24,20 @@ clean: clean-custom
 $(BIN): $(OBJ)
 	$(CC) $(LINKOBJ) -o $(BIN) $(LIBS)
 
-boss.o: boss.c
-	$(CC) -c boss.c -o boss.o $(CFLAGS)
-
-card.o: card.c
-	$(CC) -c card.c -o card.o $(CFLAGS)
+main.o: main.c
+	$(CC) -c main.c -o main.o $(CFLAGS)
 
 config.o: config.c
 	$(CC) -c config.c -o config.o $(CFLAGS)
+
+mob.o: mob.c
+	$(CC) -c mob.c -o mob.o $(CFLAGS)
+
+boss.o: boss.c
+	$(CC) -c boss.c -o boss.o $(CFLAGS)
+
+menu.o: menu.c
+	$(CC) -c menu.c -o menu.o $(CFLAGS)
 
 display.o: display.c
 	$(CC) -c display.c -o display.o $(CFLAGS)
@@ -39,11 +45,11 @@ display.o: display.c
 inGameLayout.o: inGameLayout.c
 	$(CC) -c inGameLayout.c -o inGameLayout.o $(CFLAGS)
 
-loadGame.o: loadGame.c
-	$(CC) -c loadGame.c -o loadGame.o $(CFLAGS)
+card.o: card.c
+	$(CC) -c card.c -o card.o $(CFLAGS)
 
-main.o: main.c
-	$(CC) -c main.c -o main.o $(CFLAGS)
+player.o: player.c
+	$(CC) -c player.c -o player.o $(CFLAGS)
 
 map_display.o: map_display.c
 	$(CC) -c map_display.c -o map_display.o $(CFLAGS)
@@ -53,12 +59,3 @@ map_generator.o: map_generator.c
 
 map_navigation.o: map_navigation.c
 	$(CC) -c map_navigation.c -o map_navigation.o $(CFLAGS)
-
-menu.o: menu.c
-	$(CC) -c menu.c -o menu.o $(CFLAGS)
-
-mob.o: mob.c
-	$(CC) -c mob.c -o mob.o $(CFLAGS)
-
-player.o: player.c
-	$(CC) -c player.c -o player.o $(CFLAGS)
