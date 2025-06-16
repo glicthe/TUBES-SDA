@@ -658,6 +658,7 @@ void startGame() {
     srand(time(0));
     hideCursor();
 
+    initGameStats();
     gameMap = generateMap(1);
 
     if (gameMap != Nil) {

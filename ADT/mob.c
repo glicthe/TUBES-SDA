@@ -168,7 +168,8 @@ void checkMobHealth(mobContainer *C){
 	
 	if (curr != Nil && mobHealth(curr) <= 0){
 		deleteCurrentMob(C);
-	}	
+		g_gameStats.enemiesDefeated++;
+	}
 }
 
 mobAddress search(mobContainer C, const char* mobType, int mobPosition){

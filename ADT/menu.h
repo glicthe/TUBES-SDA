@@ -5,6 +5,7 @@
 #include "inGameLayout.h"
 #include "map_display.h"
 #include "map_navigation.h"
+#include "stats.h"
 
 
 // Struktur untuk item menu

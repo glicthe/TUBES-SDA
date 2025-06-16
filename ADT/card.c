@@ -1,4 +1,5 @@
 #include "card.h"
+#include "stats.h"
 
 void initDeck(cardDeck *D) {
     deckHead(*D) = NULL;
@@ -28,7 +29,7 @@ void starterDeckInventory(cardDeck *D){
 	int Num = 0;
 	while (Num < 10){
 		if (Num <= 3) {
-			cardAddress addCard = createCard("Slash", "Attack", 1, 4);
+			cardAddress addCard = createCard("Slash", "Attack", 1, 8);
 			addCardToDeck(D, addCard);
 		} else if (Num >= 4 && Num <= 6) {
 			cardAddress addCard = createCard("Block", "Shield", 1, 5);
@@ -42,6 +43,7 @@ void starterDeckInventory(cardDeck *D){
 		}
 		Num++;
 	}
+	g_gameStats.totalCardsOwned = 10;
 }
 
 void initDeckInventoryToHand(cardDeck *inventory, cardDeck *hand, int drawAmount) {
@@ -240,7 +242,6 @@ void upgradeCard(cardDeck *D) {
         		cardCost(D->current)		
 		);
 
-        // Position
         setColorBlue(); printCards(column, row); setColorWhite();
         
 		gotoxy(columns - 10, rows + 16);
@@ -290,6 +291,7 @@ void upgradeCard(cardDeck *D) {
 				    break;
             }
         } else if (ch == KEY_ENTER) {
+			playEnterBeep();
         	if (!isUpgrade) {
 	        	if (!D->current->upgrade) {
 		        	if (strcmp(D->current->type, "Draw") == 0) {
@@ -551,9 +553,9 @@ void showDiscardPile(discardPile discard) {
 		
 	int count = 0;
 	discardPtr current = topDiscard(discard);
-	if (topDiscard(discard) != Nil) { //Check if discard is not empty
+	if (topDiscard(discard) != Nil) {
 		count++;
-	    while (cardNext(current) != Nil) { // Check if there is next card and repeat this loop
+	    while (cardNext(current) != Nil) {
 			current = cardNext(current);
 	        count++;				
 	    } 
@@ -562,13 +564,13 @@ void showDiscardPile(discardPile discard) {
 		
 	count = 0;
 	current = topDiscard(discard);
-	if (topDiscard(discard) != Nil) { //Check if discard is not empty
+	if (topDiscard(discard) != Nil) {
 		displayCardIcon(current->card, count); 
 		count++;
-	    while (cardNext(current) != Nil) { // Check if there is next card and repeat this loop
+	    while (cardNext(current) != Nil) {
 			current = cardNext(current);
 			displayCardIcon(current->card, count); 
-	        count++;				// Count the total card in discard pile
+	        count++;				
 	    }    
 	}    
 	
@@ -842,7 +844,6 @@ void displayCardIcon(cardAddress card, int cardNumber) {
 	    
 	    while(j < strlen(name) && j < 10) {
 	        if (j > 0 && isupper(name[j])) {
-	            // Found uppercase after first character, move to next line
 	            gotoxy(startCol + 8, startRow + i); 
 	            i++;
 	        }

@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "Player.h"
+#include "stats.h"
 
 #define GHOST 14
 #define GOBLIN 16

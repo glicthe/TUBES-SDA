@@ -2,6 +2,8 @@
 #define INGAMELAYOUT_H
 
 #include "display.h"
+#include "map_display.h"
+#include "stats.h"
 
 void inGame(int startCol, int startRow, int battle, int depth);
 void headBar(int startCol, int max, Player P, int turnCounter);
@@ -18,6 +20,8 @@ void printRewardSeparator_Top(int x, int y);
 void printRewardSeparator_Bottom(int x, int y);
 void printLoserBanner();
 void showLoseScreen();
+void showFinalVictoryScreen(Player *P);
+void printFinalVictoryMessage(int x, int y);
 
 // Merchant
 void merchantScreen(Player *player, cardDeck *inventory);

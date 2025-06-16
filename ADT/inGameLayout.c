@@ -41,6 +41,7 @@ void inGame(int startCol, int startRow, int type, int depth){
 	boolean state;
 	char* playerState;
 	int prevBossHealth;
+	int mobsDefeatedInThisCombat = 0;
 	
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -160,7 +161,6 @@ void inGame(int startCol, int startRow, int type, int depth){
 	            	break;
 		    	case 'q':
 		    		playEnterBeep();
-		    		SplashScreen();
 		    		running = 0;
 		    		goto Lose;
 	                break;
@@ -181,7 +181,14 @@ void inGame(int startCol, int startRow, int type, int depth){
 	                break;			
 			} 
 			if (type == 1 && countMob(C) == 0) goto Win;
-            if ((type == 2 || type == 3) && (boss == NULL || bossHealth(boss) <= 0)) goto Win;
+            if ((type == 2 || type == 3) && (boss != NULL && bossHealth(boss) <= 0)) {
+                if(type == 3) {
+                    g_gameStats.enemiesDefeated++;
+                } else {
+                    g_gameStats.enemiesDefeated++;
+                }
+                goto Win;
+            }
             
             continue;
 	} 
@@ -263,13 +270,32 @@ void inGame(int startCol, int startRow, int type, int depth){
         goto PlayerTurn;
 	
 	Win:
-		restartCard(&deckInventory, &P.hand, &P.discard);if (type == 1 || type == 2 || type == 3) {
-        showRewardScreen(&P, depth, type);
-		return;
-	Lose:
-		showLoseScreen();
-		SplashScreen();
-	}
+        if(depth > g_gameStats.highestDepthCompleted) {
+            g_gameStats.highestDepthCompleted = depth;
+        }
+
+        if (type == 3) {
+            showFinalVictoryScreen(&P);
+			showGameStats(&P);
+            SplashScreen();          
+            return;              
+        }
+        
+        restartCard(&deckInventory, &P.hand, &P.discard);
+        if (type == 1 || type == 2) {
+            showRewardScreen(&P, depth, type);
+        }
+        return; 
+
+    Lose:
+        showLoseScreen();
+        
+        if (g_gameStats.enemiesDefeated > 0) {
+            showGameStats(&P);
+        }
+
+        SplashScreen();
+        return;
 }
 
 void headBar(int startCol, int max, Player P, int turnCounter){
@@ -429,10 +455,8 @@ void playCard(Player *P, cardDeck *Inventory, mobContainer *C, Boss* boss) {
 	
         if (strcmp(cardType(played), "Attack") == 0) {
             if (currentMob(*C) != NULL) {
-                // Fighting mobs
                 attacked(cardEffect(played), C);
             } else if (boss != NULL) {
-                // Fighting boss
                 attackedBoss(cardEffect(played), boss);
             }
         } else if (strcmp(cardType(played), "Shield") == 0) {
@@ -540,6 +564,7 @@ void merchantScreen(Player *player, cardDeck *inventory) {
 	            int price = prices[currentRow][currentCol];
 	            if (player->gold >= price) {
 	                addCardToDeck(inventory, selected);
+					g_gameStats.totalCardsOwned++;
 	                player->gold -= price;
 	                printf("\nYou bought %s!\n", cardName(selected));
 	                isBuy = true;
@@ -946,7 +971,6 @@ void printLoserBanner() {
     setColorDefault();	
 }
 
-
 void showLoseScreen() {
     clearScreen();
     displayBorder();
@@ -978,8 +1002,96 @@ void showLoseScreen() {
     
     setColorDefault();
 
-    while (getch() != KEY_ENTER) {
-    }
+    while(true) {
+    if (getch() == KEY_ENTER) {
+        playEnterBeep();
+        break;
+		}
+	}
+}
+
+void printWinBanner() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	int startX = ((columns - 193) / 2);
+	int i = 0;
+	setColorLightYellow();
+    
+	gotoxy(startX, 5 + i++); printf("%s       ....                                                                             %s      ....                                                           s                  ..         ..      %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s   .xH888888Hx.                                                                        %s   .xH888888Hx.                    oec :                             :8                dF          888B.   %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s .H8888888888888:       .u    .                                  u.      u.    u.      %s .H8888888888888:                 @88888                            .88               '88bu.      48888E  %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s 888*\"\"\"?\"\"*88888X    .d88B :@8c        u          uL      ...ue888b   x@88k u@88c.    %s 888*\"\"\"?\"\"*88888X        .u      8\"*88%%       .u          u       :888ooo      .u    '*88888bu   '8888'   %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s'f     d8x.   ^%%88k  =\"8888f8888r    us888u.   .ue888Nc..  888R Y888r ^\"8888\"\"8888\"    %s'f     d8x.   ^%%88k    ud8888.    8b.       ud8888.     us888u.  -*8888888   ud8888.    ^\"*8888N   Y88F    %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s'>    <88888X   '?8    4888>'88\"  .@88 \"8888\" d88E`\"888E`  888R I888>   8888  888R     %s'>    <88888X   '?8  :888'8888.  u888888> :888'8888. .@88 \"8888\"   8888    :888'8888.  beWE \"888L  '88     %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s `:..:`888888>    8>   4888> '    9888  9888  888E  888E   888R I888>   8888  888R     %s `:..:`888888>    8> d888 '88%%\"   8888R   d888 '88%%\" 9888  9888    8888    d888 '88%%\"  888E  888E   8F   %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s        `\"*88     X    4888>      9888  9888  888E  888E   888R I888>   8888  888R     %s        `\"*88     X  8888.+\"      8888P   8888.+\"    9888  9888    8888    8888.+\"     888E  888E   4     %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s   .xHHhx..\"      !   .d888L .+   9888  9888  888E  888E  u8888cJ888    8888  888R     %s   .xHHhx..\"      !  8888L        *888>   8888L      9888  9888   .8888Lu= 8888L       888E  888F   .     %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s  X88888888hx. ..!    ^\"8888*\"    9888  9888  888& .888E   \"*888*P\"    \"*88*\" 8888\"    %s  X88888888hx. ..!   '8888c. .+   4888    '8888c. .+ 9888  9888   ^%%888*   '8888c. .+ .888N..888   u8N.  %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s !   \"*888888888\"        \"Y\"      \"888*\"\"888\" *888\" 888&     'Y\"         \"\"   'Y\"      %s !   \"*888888888\"     \"88888%%     '888     \"88888%%   \"888*\"\"888\"    'Y\"     \"88888%%    `\"888*\"\"   \"*88%% %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s        ^\"***\"`                    ^Y\"   ^Y'   `\"   \"888E                              %s        ^\"***\"`         \"YP'       88R       \"YP'     ^Y\"   ^Y'               \"YP'        \"\"        \"\"   %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s                                              .dWi   `88E                              %s                                   88>                                                                  %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s                                              4888~  J8%%                               %s                                   48                                                                   %s\n", RESET, LRED, RESET);
+	gotoxy(startX, 5 + i++); printf("%s                                               ^\"===*\"`                                %s                                   '8                                                                   %s\n", RESET, LRED, RESET);
+
+	setColorDefault();
+}
+
+void showFinalVictoryScreen(Player *P) {
+    clearScreen();
+    displayBorder();
+    
+    printWinBanner(); 
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+    int separatorWidth = 174;
+    int messageWidth = 104;
+    int separatorX = (columns - separatorWidth) / 2;
+    int messageX = (columns - messageWidth) / 2;
+
+    int currentY = 24; 
+
+    printMapSeparator_Top(separatorX, currentY);
+    currentY += 4;
+
+    printFinalVictoryMessage(messageX, currentY);
+    currentY += 31;
+    currentY += 3;
+    
+    const char* promptPart1 = "You have conquered the Bloodspire! Press ";
+    const char* promptPart2 = "[ENTER]";
+    const char* promptPart3 = " to view your final stats...";
+    
+    int totalPromptWidth = strlen(promptPart1) + strlen(promptPart2) + strlen(promptPart3);
+    int promptX = (columns - totalPromptWidth) / 2;
+    
+    gotoxy(promptX, currentY);
+    
+    setColorWhite();
+    printf("%s", promptPart1);
+    
+    setColorGreen();
+    printf("%s", promptPart2);
+    
+    setColorWhite();
+    printf("%s", promptPart3);
+    
+    setColorDefault();
+    currentY += 3;
+
+    printMapSeparator_Bottom(separatorX, currentY);
+
+    while(true) {
+    if (getch() == KEY_ENTER) {
+        playEnterBeep();
+        break;
+    	}
+	}
+
+    showGameStats(P);
 }
 
 void printRewardSeparator_Top(int x, int y) {
@@ -997,6 +1109,85 @@ void printRewardSeparator_Bottom(int x, int y) {
     gotoxy(x, y + 2); printf("                                                  %s/\\", CYAN);
     gotoxy(x, y + 3); printf("                                                  %s\\/", CYAN);
     setColorDefault();
+}
+
+
+void printFinalVictoryMessage(int x, int y) {
+	setColorBrightWhite();
+	gotoxy(x, y++); printf("  ________________________________________________________________________________________________________");
+	gotoxy(x, y++); printf(" / \\                                                                                                      \\");
+	gotoxy(x, y++); printf("|  |                   ");
+	setColorYellow(); printf("@=====");
+	setColorBrightWhite(); printf("  ");
+	setColorLightYellow(); printf("A Triumphant Proclamation from the Realm's Edge");
+	setColorBrightWhite(); printf("  ");
+	setColorYellow(); printf("=====@");
+	setColorBrightWhite(); printf("                    |");
+	gotoxy(x, y++); printf(" \\_|                                                                                                      |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("Hear ye, hear ye! After a long and desolate silence, the echo of a champion's footfalls is");
+	setColorBrightWhite(); printf("      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("heard at last!");
+	setColorBrightWhite(); printf("                                                                                  |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("The path you have walked is not for the faint of heart. Many a brave soul has tried and has");
+	setColorBrightWhite(); printf("     |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("fallen,  their  shadows  a  testament  to  the severity of this ordeal. Yet today, the very");
+	setColorBrightWhite(); printf("     |");
+	gotoxy(x, y++); printf("   |     ");
+	setColorLightYellow(); printf(" destiny  of  this  land  has been reshaped, not by chance, but by a single, unwavering will.");
+	setColorBrightWhite(); printf("    |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("And so,  to  you,  the  Conqueror who now stands at this journey's end, we offer our highest");
+	setColorBrightWhite(); printf("    |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("honors!  Every  foe  you faced, every  card you  played, was a masterstroke of your peerless");
+	setColorBrightWhite(); printf("    |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("strategy and courage.");
+	setColorBrightWhite(); printf("                                                                           |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("The final sovereign  of  shadow, the  great dragon  itself, now  lies  vanquished before you,");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("serving as the  final  chapter to a dark  tale you  alone have closed. From this day forward,");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("your name shall be immortalized in song and legend.  Bards will  craft hymns  of the Champion");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("who conquered the Trial of Bloodspire, and new knights will whisper your name in the training");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("halls with awe.");
+	setColorBrightWhite(); printf("                                                                                 |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("Rest now in glorious victory. The entire realm is in your debt. This triumph is yours-eternal");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("and unforgettable.");
+	setColorBrightWhite(); printf("                                                                              |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |                                                                          ");
+	setColorGreen(); printf("With warmest regards,");
+	setColorBrightWhite(); printf("       |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |                                                                         ");
+	setColorYellow(); printf("- The Bloodspire Team -");
+	setColorBrightWhite(); printf("      |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |   ___________________________________________________________________________________________________|__");
+	gotoxy(x, y++); printf("   |  /                                                                                                     /");
+	gotoxy(x, y++); printf("   \\_/_____________________________________________________________________________________________________/");
+	setColorDefault();
 }
 
 void printTreasureChest(int x, int y) {
@@ -1122,6 +1313,7 @@ void showRewardScreen(Player *player, int depth, int type) {
             if(key == KEY_RIGHT) selectedIndex = (selectedIndex + 1) % 3;
         } else if (key == KEY_ENTER) {
             playEnterBeep();
+			g_gameStats.totalCardsOwned++;
             cardChosen = true;
         }
     }
@@ -1204,8 +1396,12 @@ void showRewardScreen(Player *player, int depth, int type) {
     int bottomSeparatorY = textY + 2;
     printRewardSeparator_Bottom(separatorX, bottomSeparatorY);
 
-    while (getch() != KEY_ENTER) {
-    }
+    while(true) {
+    if (getch() == KEY_ENTER) {
+        playEnterBeep();
+        break;
+    	}
+	}
 }
 
 void highlightLeft() {

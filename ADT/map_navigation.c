@@ -1,5 +1,3 @@
-// map_navigation.c
-
 #include "map_navigation.h"
 #include "map_display.h"
 #include "config.h"
@@ -125,7 +123,7 @@ void startNavigation(MapNode* mapRoot) {
             printf("\033[95mDescription\033[0m      ==>");
             if (selectionIndex >= 0 && selectionIndex < currentNode->numChildren) {
                 selectedChild = currentNode->children[selectionIndex];
-                printf("    \033[0;37m"); // Atur warna teks deskripsi (putih biasa)
+                printf("    \033[0;37m");
                 switch(selectedChild->type) {
                     case NODE_ENEMY:
                         printf("Engage in combat with a common foe.");
@@ -167,7 +165,7 @@ void startNavigation(MapNode* mapRoot) {
                         case KEY_RIGHT:
                             selectionIndex = (selectionIndex + 1) % currentNode->numChildren;
                             break;
-                        case 59: // F1
+                        case 59:
                             clearScreen();
                             gotoxy(0, 0);
                             printf("--- Map Structure ---\n");
