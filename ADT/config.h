@@ -7,6 +7,8 @@
 #include <string.h>
 #include <conio.h>
 #include <stdbool.h>
+#include <pthread.h>
+#include <mmsystem.h>
 
 #define true 1
 #define false 0
@@ -22,7 +24,7 @@
 // Fungsi untuk posisi Node
 #define NODE_DISPLAY_WIDTH_L 15  // Lebar tampilan node level 1
 #define NODE_DISPLAY_WIDTH_M 12  // Lebar tampilan node level 2
-#define MAP_START_X 22 
+#define MAP_START_X 15 
 #define MAP_START_Y 35
 #define MAX_CHILDREN_DISPLAY 4   // Batasan anak yang bisa ditampilkan dalam satu baris untuk kasus tertentu
 #define MAX_GRANDCHILDREN_DISPLAY 8 // Batasan cucu yang bisa ditampilkan
@@ -115,7 +117,8 @@ void setColorBrightWhite();
 void setColorDefault();
 void setColorHighlight();
 void setColorHighlight_Map();
-
+void* MobSoundBattle(void* arg);
+void* BossSoundBattle(void* arg);
 
 void playArrowBeep();
 void playEnterBeep();

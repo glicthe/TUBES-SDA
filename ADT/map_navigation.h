@@ -7,7 +7,8 @@
 #include "inGameLayout.h"
 #include "config.h"
 
-void startNavigation(MapNode* mapRoot);
+void startNavigation(MapNode* mapRoot, GameSave* loadGame);
+MapNode* gotoCurrNode(MapNode* checkMap);
 void drawMapHeaderSeparator(int x, int y, int width);
 void drawMapFooterSeparator(int x, int y, int width);
 

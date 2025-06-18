@@ -1,16 +1,13 @@
+// map_navigation.c
+
 #include "map_navigation.h"
 #include "map_display.h"
-#include "config.h"
 
-void startNavigation(MapNode* mapRoot) {
-    MapNode *currentNode, *selectedChild;
+void startNavigation(MapNode* mapRoot, GameSave* loadGame) {
+	boolean checkLoad = false;
+	MapNode *currentNode, *selectedChild;
     int selectionIndex, keyPressed, i;
-
-    if (mapRoot == Nil) {
-        fprintf(stderr, "Error: Invalid map root node\n");
-        return;
-    }
-	
+		
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
@@ -24,20 +21,38 @@ void startNavigation(MapNode* mapRoot) {
     int mapTitleCol = columns / 4 - 30;
     int mapTitleRow = 3; 
     
-    
     currentNode = mapRoot;
     selectionIndex = 0;
     g_isGameActive = TRUE;
+	
+	
+	if (mapRoot == Nil) {
+		mapRoot = &loadGame->mapSaved;
+		boolean checkLoad = true;
+		currentNode = gotoCurrNode(mapRoot);
+		if (currentNode->type == NODE_ENEMY){
+			inGame(startCol, startRow, 1, currentNode->depth, mapRoot, checkLoad, loadGame);
+		} else if (currentNode->type == NODE_SECONDARY_BOSS) {
+        	inGame(startCol, startRow, 2, currentNode->depth, mapRoot, checkLoad, loadGame);								
+		} else if (currentNode->type == NODE_BIG_BOSS) {
+        	inGame(startCol, startRow, 3, currentNode->depth, mapRoot, checkLoad, loadGame);
+		} else if (currentNode->type == NODE_MERCHANT) {
+        	inGame(startCol, startRow, 4, currentNode->depth, mapRoot, checkLoad, loadGame);																
+		} else if (currentNode->type == NODE_REST) {
+        	inGame(startCol, startRow, 5, currentNode->depth, mapRoot, checkLoad, loadGame);																
+		}
+	}
+	
 
     while (g_isGameActive && currentNode != Nil) {
         boolean isNodeChosen = FALSE;
-        currentNode->isVisited = TRUE;
-        int k;
+        
 
         while (!isNodeChosen && g_isGameActive && currentNode != Nil) {
             clearScreen();
             displayBorder();
             hideCursor();
+            drawMapView(currentNode, selectionIndex);			
 			
 			mapTitleRow = 3;
 			i = 1;
@@ -72,7 +87,7 @@ void startNavigation(MapNode* mapRoot) {
 			gotoxy(mapTitleCol, mapTitleRow + i); i++; i++; i++; i++;
 			printf("                                            \"                           '8                      \033[1;31m:\"                                           \"                                          \033[0m");
             
-            int separatorX = (columns - 174) /2;
+			int separatorX = (columns - 174) /2;
             printMapSeparator_Top(separatorX, 22);
 
             
@@ -123,7 +138,7 @@ void startNavigation(MapNode* mapRoot) {
             printf("\033[95mDescription\033[0m      ==>");
             if (selectionIndex >= 0 && selectionIndex < currentNode->numChildren) {
                 selectedChild = currentNode->children[selectionIndex];
-                printf("    \033[0;37m");
+                printf("    \033[0;37m"); // Atur warna teks deskripsi (putih biasa)
                 switch(selectedChild->type) {
                     case NODE_ENEMY:
                         printf("Engage in combat with a common foe.");
@@ -165,12 +180,12 @@ void startNavigation(MapNode* mapRoot) {
                         case KEY_RIGHT:
                             selectionIndex = (selectionIndex + 1) % currentNode->numChildren;
                             break;
-                        case 59:
+                        case 59: // F1
                             clearScreen();
                             gotoxy(0, 0);
                             printf("--- Map Structure ---\n");
                             printMapDebug(mapRoot, 0);
-                            printf("--- END ---\n");
+							printf("--- END ---\n");
                             printf("\nTekan Enter untuk kembali...");
                             while (_getch() != KEY_ENTER);
                             break;
@@ -182,16 +197,17 @@ void startNavigation(MapNode* mapRoot) {
                         if (currentNode->numChildren > 0) {
                             playEnterBeep();
                             currentNode = currentNode->children[selectionIndex];
+                            currentNode->isVisited = TRUE;
                             if (currentNode->type == NODE_ENEMY){
-                            	inGame(startCol, startRow, 1, currentNode->depth);
+                            	inGame(startCol, startRow, 1, currentNode->depth, mapRoot, checkLoad, loadGame);
 							} else if (currentNode->type == NODE_SECONDARY_BOSS) {
-                            	inGame(startCol, startRow, 2, currentNode->depth);								
+                            	inGame(startCol, startRow, 2, currentNode->depth, mapRoot, checkLoad, loadGame);								
 							} else if (currentNode->type == NODE_BIG_BOSS) {
-                            	inGame(startCol, startRow, 3, currentNode->depth);								
+                            	inGame(startCol, startRow, 3, currentNode->depth, mapRoot, checkLoad, loadGame);
 							} else if (currentNode->type == NODE_MERCHANT) {
-                            	inGame(startCol, startRow, 4, currentNode->depth);																
+                            	inGame(startCol, startRow, 4, currentNode->depth, mapRoot, checkLoad, loadGame);																
 							} else if (currentNode->type == NODE_REST) {
-                            	inGame(startCol, startRow, 5, currentNode->depth);																
+                            	inGame(startCol, startRow, 5, currentNode->depth, mapRoot, checkLoad, loadGame);																
 							}
                             selectionIndex = 0;
                             isNodeChosen = TRUE;
@@ -213,4 +229,32 @@ void startNavigation(MapNode* mapRoot) {
         }
     }
     setColorDefault();
+}
+
+MapNode* gotoCurrNode(MapNode* checkMap) {
+    int i;
+    MapNode* tempId = Nil;
+    MapNode* result;
+
+    if (checkMap == Nil) {
+        return Nil;
+    }
+
+    // Check if current node is visited
+    if (checkMap->isVisited == 1) {
+        tempId = checkMap;
+    }
+
+    // Safely iterate over children
+    for (i = 0; i < checkMap->numChildren; i++) {
+        // Ensure child pointer is valid before recursive call
+        if (checkMap->children != Nil && checkMap->children[i] != Nil) {
+            result = gotoCurrNode(checkMap->children[i]);
+            if (result != Nil) {
+                return result;
+            }
+        }
+    }
+
+    return tempId; 
 }

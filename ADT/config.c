@@ -136,3 +136,16 @@ void playArrowBeep() {
 void playEnterBeep() {
     Beep(BEEP_ENTER_FREQ, BEEP_ENTER_DURATION);
 }
+
+void* MobSoundBattle(void* arg) {
+	PlaySound("BattleSound.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+    Sleep(1000);
+	return NULL;
+}
+
+void* BossSoundBattle(void* arg) {
+	PlaySound("BossSound.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+    Sleep(1000);
+	return NULL;
+}
+
