@@ -28,8 +28,8 @@ Folders=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
-CompilerSettings=0000000000000000001000000
-UnitCount=23
+CompilerSettings=0000000000000000000000000
+UnitCount=26
 
 [VersionInfo]
 Major=1
@@ -261,7 +261,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit24]
-FileName=map_navigation.c
+FileName=loadGame.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -271,7 +271,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit25]
-FileName=map_navigation.h
+FileName=loadGame.h
 CompileCpp=0
 Folder=
 Compile=1
@@ -296,6 +296,15 @@ CompileCpp=0
 Folder=
 Compile=1
 Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit26]
+FileName=saved_game.txt
+Folder=
+Compile=0
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=

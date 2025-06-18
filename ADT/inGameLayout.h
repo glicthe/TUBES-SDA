@@ -2,13 +2,17 @@
 #define INGAMELAYOUT_H
 
 #include "display.h"
+#include "map_generator.h"
+#include "loadGame.h"
 #include "map_display.h"
 #include "stats.h"
 
-void inGame(int startCol, int startRow, int battle, int depth);
-void headBar(int startCol, int max, Player P, int turnCounter);
+void inGame(int startCol, int startRow, int battle, int depth, MapNode* mapRoot, boolean checkLoad, GameSave* loadGame);
+void headBar(int startCol, int max, Player P, MapNode* currMap, int turnCounter);
 void battleScreen(int startCol, int startRow, int colunmns, int rows, char* state);
 void showMobPlayer(Boss* boss, mobContainer C, int columns, int rows, boolean state);
+void PlayerQuit(MapNode* mapRoot, Player* player, cardDeck* deckInventory, mobContainer mob, Boss* boss, int *choose);
+
 
 // Play
 void playCard(Player *P, cardDeck *Inventory, mobContainer *C, Boss* boss);
@@ -29,7 +33,8 @@ cardAddress generateRandomCard();
 void printMerchant();
 void skipLabel(const char* name);
 void printHand(int Column, int row);
-void printMerchantCard(int column, int row, Card *shopCard);
+void printMerchantCard(int Column, int row);
+void printCard(int column, int row, Card *shopCard);
 
 // Rest
 void restScreen(Player *player, cardDeck *deck);
@@ -41,6 +46,5 @@ void highlightLeft();
 void highlightRight();
 void printSmithText();
 void printRestText();
-
 
 #endif 

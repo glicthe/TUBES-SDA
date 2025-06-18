@@ -1,39 +1,49 @@
 #include "inGameLayout.h"
 
-void inGame(int startCol, int startRow, int type, int depth){
+void inGame(int startCol, int startRow, int type, int depth, MapNode* mapRoot, boolean checkLoad, GameSave* loadGame){
 	// initiate
 	static mobContainer C;
 	static Player P;
 	static Boss* boss;
     static cardDeck deckInventory;
-	if (depth == 1) {
-    	P = createPlayer();
-    	boss = Nil;
-		createMobContainer(&C);
-    	initDeck(&deckInventory);
-		starterDeckInventory(&deckInventory);
+    pthread_t soundBattle;
+		
+	if (checkLoad) {
+		C = loadGame->mobSaved;
+		P = loadGame->playerSaved;
+		deckInventory = loadGame->deckInventorySaved;
+		boss = loadGame->bossSaved;
+		checkLoad = false; 
+	} else if (!checkLoad) {
+		if (depth == 1) {
+	    	P = createPlayer();
+	    	boss = Nil;
+			createMobContainer(&C);
+	    	initDeck(&deckInventory);
+			starterDeckInventory(&deckInventory);
+		}
+		
+		if (type == 1) {
+	    	randGenerateMob(&C);
+	    	boss = Nil;
+	    	pthread_create(&soundBattle, NULL, MobSoundBattle, NULL);
+		} else if (type == 2) {
+			boss = createRandSecondaryBoss(boss);
+			pthread_create(&soundBattle, NULL, BossSoundBattle, NULL);
+		} else if (type == 3) {
+			patternQueue dragoon;
+			boss = createBoss("dragoon", 80, &dragoon);
+			pthread_create(&soundBattle, NULL, BossSoundBattle, NULL);
+		} else if (type == 4) {
+			merchantScreen(&P, &deckInventory);
+			return;
+		} else if (type == 5) {
+			initDiscardToInventory(&P.discard, &deckInventory);
+			restScreen(&P, &deckInventory);
+			return;
+		}
+    	initDeckInventoryToHand(&deckInventory, &P.hand, 0);
 	}
-	
-	if (type == 1) {
-    	randGenerateMob(&C);
-    	boss = Nil;
-	} else if (type == 2) {
-		boss = createRandSecondaryBoss(boss);
-	} else if (type == 3) {
-		patternQueue dragoon;
-		boss = createBoss("dragoon", 80, &dragoon);
-	} else if (type == 4) {
-		merchantScreen(&P, &deckInventory);
-		return;
-	} else if (type == 5) {
-		initDiscardToInventory(&P.discard, &deckInventory);
-		restScreen(&P, &deckInventory);
-		return;
-	}
-    
-    initDiscardToInventory(&P.discard, &deckInventory);
-	initDeckInventoryToHand(&deckInventory, &P.hand, 0);
-	
 	P.energy = 3;
     int turnCounter = 0;
 	int running = 1;
@@ -57,18 +67,19 @@ void inGame(int startCol, int startRow, int type, int depth){
 	int inHandRow = rows - startRow + 2; 
 	
 	
+	
 	while (running) {
 		goto PlayerTurn;
 		PlayerTurn:
 			if (P.health == 0) goto Lose;
 			state = true;
 			clearScreen();
-			playerState = "default";
 			displayBorder();
+			playerState = "default";
 			hideCursor();
 			setColorDefault();
 			
-			headBar(startCol, columns, P, turnCounter); 
+			headBar(startCol, columns, P, mapRoot, turnCounter); 
 			battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default"); 
 			
 			if (type == 1) {
@@ -114,7 +125,7 @@ void inGame(int startCol, int startRow, int type, int depth){
 	            case KEY_ENTER:
 	            	playEnterBeep();
                     playerState = strdup(cardType(currentCard(P.hand)));
-				    if (P.energy != 0){
+				    if (P.energy >= cardCost(currentCard(P.hand))){
 					    if (type == 1) {
 					        tempMob = mobHealth(currentMob(C));
 					    } else if (type == 2 || type == 3) {
@@ -136,7 +147,7 @@ void inGame(int startCol, int startRow, int type, int depth){
 					        Sleep(500);
 					    }
 					    
-					    if (strcmp(playerState, "Shield") == 0) {
+					    if (!strcmp(playerState, "Shield")) {
 					        battleScreen(battleScreenCol, battleScreenRow, columns, rows, playerState); 
 					        setColorDefault();
 					        Sleep(400);
@@ -145,11 +156,11 @@ void inGame(int startCol, int startRow, int type, int depth){
 				    
 				    if (type == 1) {
 				        checkMobHealth(&C);
-				    }
+				    } 
 				    break;
 	            case 'h':
 	            	playEnterBeep();
-	            	executeMenuAction(3);
+	            	howToPlay();
 	            	break;
 	            case 'e':
 					turnCounter++; 
@@ -161,8 +172,13 @@ void inGame(int startCol, int startRow, int type, int depth){
 	            	break;
 		    	case 'q':
 		    		playEnterBeep();
-		    		running = 0;
-		    		goto Lose;
+		    		initDiscardToInventory(&P.discard, &deckInventory);
+		    		int choose = 0;
+		    		PlayerQuit(mapRoot, &P, &deckInventory, C, boss, &choose);
+					if (choose == 1) {
+		    			running = 0;
+						SplashScreen();
+					} else break;
 	                break;
 	            case 'a':
 	            	showDiscardPile(P.discard);
@@ -178,18 +194,15 @@ void inGame(int startCol, int startRow, int type, int depth){
 		    	case 'd':
 					showDeck(P.discard, P.hand, deckInventory);
 					system("pause");
-	                break;			
+	                break;						
 			} 
-			if (type == 1 && countMob(C) == 0) goto Win;
-            if ((type == 2 || type == 3) && (boss != NULL && bossHealth(boss) <= 0)) {
-                if(type == 3) {
-                    g_gameStats.enemiesDefeated++;
-                } else {
-                    g_gameStats.enemiesDefeated++;
-                }
+			if (type == 1 && countMob(C) == 0)  {
+				g_gameStats.enemiesDefeated++;
+				goto Win;
+			} else if ((type == 2 || type == 3) && (boss != NULL && bossHealth(boss) <= 0)) {
+                g_gameStats.enemiesDefeated++;
                 goto Win;
-            }
-            
+            } else if (P.health < 0) goto Lose;
             continue;
 	} 
 	
@@ -201,7 +214,7 @@ void inGame(int startCol, int startRow, int type, int depth){
 			displayBorder();
 				
 			battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default"); 
-			headBar(startCol, columns, P, turnCounter);
+			headBar(startCol, columns, P, mapRoot, turnCounter);
 			printMobContainer(C, mobStatsCol, mobStatsRow);
 			printPlayerStatus(P, playerStatsCol, playerStatsRow);
 			showMobPlayer(boss, C, columns, rows, state);
@@ -213,6 +226,7 @@ void inGame(int startCol, int startRow, int type, int depth){
 				setColorDefault();
 				takeDamage(&P, damage);
 			} else {
+				battleScreen(battleScreenCol, battleScreenRow, columns, rows, "EnemyHeal"); 
 				mobheal(&current);
 			}
 			current = mobNext(current);
@@ -236,7 +250,7 @@ void inGame(int startCol, int startRow, int type, int depth){
 		char bossAction[10];
 		int quantity = 0 ;
 		battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default");
-		headBar(startCol, columns, P, turnCounter);
+		headBar(startCol, columns, P, mapRoot, turnCounter);
 		
 		printBossStats(boss, mobStatsCol, mobStatsRow);
 		printPlayerStatus(P, playerStatsCol, playerStatsRow);
@@ -256,6 +270,7 @@ void inGame(int startCol, int startRow, int type, int depth){
 			}
 			takeDamage(&P, quantity);
 		} else  {
+			battleScreen(battleScreenCol, battleScreenRow, columns, rows, "EnemyHeal"); 
 			bossHeal(boss, quantity);
 		}
 		
@@ -270,21 +285,26 @@ void inGame(int startCol, int startRow, int type, int depth){
         goto PlayerTurn;
 	
 	Win:
-        if(depth > g_gameStats.highestDepthCompleted) {
+		if(depth > g_gameStats.highestDepthCompleted) {
             g_gameStats.highestDepthCompleted = depth;
         }
 
         if (type == 3) {
-            showFinalVictoryScreen(&P);
-			showGameStats(&P);
+        	PlaySound(NULL, NULL, SND_PURGE);
+            PlaySound("VICTORY.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+			showFinalVictoryScreen(&P);
+        	PlaySound(NULL, NULL, SND_PURGE);
             SplashScreen();          
             return;              
         }
         
-        restartCard(&deckInventory, &P.hand, &P.discard);
+        
         if (type == 1 || type == 2) {
+        	initDiscardToInventory(&P.discard, &deckInventory);
             showRewardScreen(&P, depth, type);
         }
+        PlaySound(NULL, NULL, SND_PURGE);
+        pthread_join(soundBattle, NULL);
         return; 
 
     Lose:
@@ -293,12 +313,247 @@ void inGame(int startCol, int startRow, int type, int depth){
         if (g_gameStats.enemiesDefeated > 0) {
             showGameStats(&P);
         }
-
+		PlaySound(NULL, NULL, SND_PURGE);
+		pthread_join(soundBattle, NULL);
         SplashScreen();
         return;
 }
 
-void headBar(int startCol, int max, Player P, int turnCounter){
+void PlayerQuit(MapNode* mapRoot, Player* player, cardDeck* deckInventory, mobContainer mob, Boss* boss, int *choose) {
+	clearScreen();
+	displayBorder();
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int columns = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+	int rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+	int startCol = columns / 4 - 17;
+	int startRow = 10;
+	int yesCol = columns / 3 - 30;
+	int yesRow = rows  / 2 - 10;
+	int noCol = columns / 2 + 15;
+	int noRow = rows / 2 - 10;
+	int key, i = 1;
+	int COLOR = RESET;
+	
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[1;31m       ...                        _                                 \033[0m...                         \033[1;31m....                              .         s          \033[90m...    					\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[1;31m   .x888888hx    :               \033[1;31mu                                \033[0mx8\033[90m8\" !\033[0m.                   \033[1;31m.n~8888888nx                         @88>      :8       \033[90mu*\"\"888b. 				\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[1;31m  d88888\033[1;31m888888hxx               \033[1;31m88Nu.   u.                       \033[0m888\033[90mX   8  \033[0m.-=x.          \033[1;31m:88\033[38;2;55;55;55m>'8\033[1;31m888888888:         x.    .       %%8P      .88      \033[90mJ88N. 8888r					\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[1;31m 8\" ... `\"*8888\033[38;2;55;55;55m%%`        \033[1;31mu     '88888.o888c      .u             \033[0mX8888. X\" :'.H88\033[90mL        \033[1;31m:888\033[38;2;55;55;55m8 \"*88888\033[1;31m8888k      .@88k  z88u      .      :888ooo   \033[90m'888 .8888>			\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[1;31m!  \"   ` .xnxx\033[38;2;55;55;55m.       \033[1;31mus888u.   ^8888  8888   ud8888.           \033[0m?88888X.  \033[90mf 48\033[0m88\033[90m\"        \033[1;31m'8888\033[38;2;55;55;55m8.         \"8\033[1;31m>    \033[38;2;55;55;55m~\"8\033[1;31m888 \033[38;2;55;55;55m^8\033[1;31m888    \033[38;2;55;55;55m.\033[1;31m@88u  \033[38;2;55;55;55m-*8\033[1;31m888\033[38;2;55;55;55m888    \033[90m'\"  8888%% 			\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[1;31mX X   .H8888888%%:  .@8\033[38;2;55;55;55m8 \"8\033[1;31m888\"   8888  8888 :888'8888.         \033[90m.x*\033[0m888888h\033[90mX   `\"`          \033[1;31m?8888\033[38;2;55;55;55m8          'X      8\033[1;31m888  \033[38;2;55;55;55m8\033[1;31m88R   \033[38;2;55;55;55m''8\033[1;31m88E`   \033[38;2;55;55;55m8\033[1;31m888          \033[90m88*\"   			");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[1;31mX 'hn8888888*\"   > 9888  \033[38;2;55;55;55m9\033[1;31m888    8888  8888 d888 '8\033[38;2;55;55;55m8%%\"        \033[0md\033[90m8  `\033[0m?8888888.            \033[1;31m?  %%888!           !      8888  \033[38;2;55;55;55m8\033[1;31m88R     \033[38;2;55;55;55m8\033[1;31m88E    8888         \033[90m48  4   			\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[38;2;55;55;55mX: `*8\033[1;31m888\033[38;2;55;55;55m8%%`     ! \033[1;31m9888  988\033[38;2;55;55;55m8    8\033[1;31m888  888\033[38;2;55;55;55m8 \033[1;31m8888.\033[38;2;55;55;55m+\"          \033[0mX8\033[90m8L   \033[0m`%%888888k            \033[1;31m\".:88\"            !      8888  888R     888E    8888         \033[90m'h.u*   			\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[38;2;55;55;55m'8\033[1;31mh.. \033[38;2;55;55;55m``\033[1;31m     ..x8\033[38;2;55;55;55m> 9\033[1;31m888  988\033[38;2;55;55;55m8   .88\033[1;31m88b.88\033[38;2;55;55;55m8P 8\033[1;31m888L            \033[0m8888x     ?88888>             \033[1;31mxHH8Hx.        .X  :   8888 \033[38;2;55;55;55m,\033[1;31m888B .   888E   .8888L\033[38;2;55;55;55mu=        \033[90m.     				\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[38;2;55;55;55m `8\033[1;31m888888888888\033[38;2;55;55;55m8f  98\033[1;31m88  988\033[38;2;55;55;55m8    ^Y8\033[1;31m888\033[38;2;55;55;55m*\"\"  '8\033[1;31m888c. \033[38;2;55;55;55m.+       \033[0m888888hx.x\033[38;2;55;55;55m! \033[0m?888\033[38;2;55;55;55m>           :88\033[1;31m8888888hx....x\\8..X  \033[38;2;55;55;55m\"8\033[1;31m888Y \033[38;2;55;55;55m8\033[1;31m888\"    888&   \033[38;2;55;55;55m^%%8\033[1;31m88\033[38;2;55;55;55m*         \033[90md8b.   			\033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[38;2;55;55;55m  '%%8\033[1;31m88888888\033[38;2;55;55;55m8*\"   \"8\033[1;31m88*\"\"88\033[38;2;55;55;55m8\"     `Y\"       \"88\033[1;31m88\033[38;2;55;55;55m8%%         \033[90m'*8\033[0m888888\033[90m\"  '\033[0m88\033[90m8           \033[38;2;55;55;55m:~  `\"88\033[1;31m88888888!`\033[38;2;55;55;55m'8\033[1;31m88\033[38;2;55;55;55m8   `Y\"   'YP      R\033[1;31m88\033[38;2;55;55;55m8\"    'Y\"         \033[90m\"888%%   \033[0m");
+	gotoxy(startCol, startRow + i); i++;
+	printf("\033[38;2;55;55;55m     ^\"****\"\"`      ^Y\"   ^Y'                  \"YP'            \033[90m`\"\"\"\"\"   .88%%\033[0m                   \033[38;2;55;55;55m`\"\"*8*\"\033[1;31m\"`   \033[38;2;55;55;55m\"*\"                    \"\"                    \033[90m%% \033[0m");
+	goto YESNO;
+	
+	YESNO:
+		if (*choose == 1) {
+			COLOR = RED;
+			i = 1;
+			gotoxy(yesCol, yesRow + i); i++;
+			printf("\033[1;33m _____                                                 _____");              
+			gotoxy(yesCol, yesRow + i); i++;
+			printf("( ___ )                                               ( ___ )");
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   |");
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |                                                 |   | ");
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |                                     %s.x+=:.%s      |   |  ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |       %s.xnnx.  .xx.                 z`    ^%%%s     |   |  ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |     %s.f``\"888X< `888.                  .   <k%s    |   |    ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |     %s8L   8888X  8888       .u       .@8Ned8\"%s    |   |    ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |    %sX88h. `8888  X888k   ud8888.   .@^%%8888\"%s     |   |   ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |    %s'8888 '8888  X8888 :888'8888. x88:  `)8b.%s    |   |     ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |     %s`*88>'8888  X8888 d888 '88%%\" 8888N=*8888%s    |   |   ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |       %s`! X888~  X8888 8888.+\"     %%8\"    R88%s    |   |  ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |      %s-`  X*\"    X8888 8888L        @8Wou 9%%%s     |   |   ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |       %sxH88hx  . X8888 '8888c. .+ .888888P`%s      |   |     ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |     %s.*\"*88888~  X888X  \"88888%%   `   ^\"F%s        |   | ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |     %s`    \"8%%    X888>    \"YP'%s                   |   |  ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |        %s.x..     888f%s                            |   |     ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |       %s88888    :88f%s                             |   |     ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |       %s\"88*\"  .x8*~%s                              |   |   ", COLOR, LYELLOW);
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |   |                                                 |   |    ");
+			gotoxy(yesCol, yesRow + i); i++;
+			printf(" |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___|   ");
+			gotoxy(yesCol, yesRow + i); i++;
+			printf("(_____)                                               (_____)   "); 
+			
+			startCol = noCol;
+			startRow = noRow;
+		} else if (*choose == 0) {
+			COLOR = GREEN; 
+			i = 1;
+			gotoxy(noCol, noRow + i); i++;
+			printf("\033[1;33m  _____                                            _____    ");					 
+			gotoxy(noCol, noRow + i); i++;		 
+			printf(" ( ___ )                                          ( ___ )   ");
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|   |    ");
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |                                            |   |    ");
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |                                            |   |    ");
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s     ...     ...                   %s   |   |    ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s  .=*8888n..\"%%888:               %s     |   |  ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s X    ?8888f '8888          u.     %s   |   |    ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s 88x. '8888X  8888>   ...ue888b    %s   |   |    ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s'8888k 8888X  '\"*8h.  888R Y888r  %s    |   |   ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s \"8888 X888X .xH8     888R I888>  %s    |   |   ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s   `8\" X888!:888X     888R I888>  %s    |   |   ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s  =~`  X888 X888X     888R I888>   %s   |   |    ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s   :h. X8*` !888X    u8888cJ888    %s   |   |    ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s  X888xX\"   '8888..:  \"*888*P\"  %s      |   | ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s:~`888f     '*888*\"     'Y\"      %s     |   |  ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |      %s    \"\"        `\"`               %s      |   | ", COLOR, LYELLOW);
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |                                            |   |    ");
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |                                            |   |    ");
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |   |                                            |   |    ");
+			gotoxy(noCol, noRow + i); i++;
+			printf("  |___|~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~|___|    ");
+			gotoxy(noCol, noRow + i); i++;
+			printf(" (_____)                                          (_____)   ");
+			
+			startCol = yesCol;
+			startRow = yesRow;
+		}
+		i = 1;
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     _____        _____                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                    ( ___ )      ( ___ )                     ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |~~~~~~~~|   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |   |        |   |                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                     |___|~~~~~~~~|___|                      ");
+		gotoxy(startCol, startRow + i); i++;
+		printf("                    (_____)      (_____)                     ");
+		
+		startCol = columns / 3 + 18;
+		startRow = rows - 15;
+		gotoxy(startCol, startRow);
+		printf("\033[1;33;41m<-- USE KEY ARROW LEFT OR RIGHT TO SELECT -->\033[0m\033[1;33m");
+	
+	
+		key = getch();
+		while(1){
+				switch(key) {
+					case 224:
+			            key = getch();
+			            switch (key) {
+							case KEY_LEFT: 
+								playArrowBeep();
+								if (*choose == 0) *choose = 1;
+								else *choose = 0;
+								goto YESNO;
+								break;
+							case KEY_RIGHT:
+								playArrowBeep();
+								if (*choose == 1) *choose = 0;
+								else *choose = 1;
+								goto YESNO;
+								break;
+							default:
+								break;
+							}
+						break;
+					case KEY_ENTER:
+						playEnterBeep();
+						goto EXECUTE;
+						break;
+				}
+				continue;
+		}
+		
+	EXECUTE:
+		if (*choose == 1) saveGameProgress(mapRoot, player, deckInventory, mob, boss);
+		else return;
+	
+	
+	
+}
+
+void headBar(int startCol, int max, Player P, MapNode* currMap, int turnCounter){
 	int i, headBarRow = 3;
 	int headBarCol = 2;;
 	int checkTurn = turnCounter % 2;
@@ -349,7 +604,7 @@ void headBar(int startCol, int max, Player P, int turnCounter){
 	printf("===========");
     gotoxy(startCol + 80, headBarRow + 3);
 	setColorGreen();
-    printf("LEVEL [_]");
+    printf("DEPTH [%d]", currMap->depth + 1);
     gotoxy(startCol + 79, headBarRow + 4);
 	setColorBrightWhite();
 	printf("===========");
@@ -383,9 +638,12 @@ void battleScreen(int startCol, int startRow, int columns, int rows, char* state
 	const int screenBorder = (COLOR_WHITE * 16) + COLOR_WHITE;
 	const int screenBorderAttacked = (COLOR_RED * 16) + COLOR_RED;
 	const int screenBorderBlock = (COLOR_BLUE * 16) + COLOR_BLUE;
+	const int screenBorderMobHeal = (COLOR_GREEN * 16) + COLOR_GREEN;
 	
 	if (!strcmp(state, "attacked")){
 		setTextColor(screenBorderAttacked);
+	} else if (!strcmp(state, "EnemyHeal")) {
+		setTextColor(screenBorderMobHeal);
 	} else if (!strcmp(state, "Shield")) {
 		setTextColor(screenBorderBlock);
 	} else if (!strcmp(state, "dragoon")){
@@ -425,13 +683,13 @@ void showMobPlayer(Boss* boss, mobContainer C, int columns, int rows, boolean st
 	if (boss != Nil) {
         startCol = columns - 100;
         startRow = rows / 3;
-        printBoss(startCol, startRow, boss, state);
-        
+    	printBoss(startCol, startRow, boss, state);   
 	}
 	
 	startCol = (columns / 4) - 50;
 	startRow = rows / 3 - 5;
 	setColorDefault();
+	
 	printPlayerSprite(startCol, startRow);
 	
 	setColorDefault();
@@ -453,15 +711,17 @@ void playCard(Player *P, cardDeck *Inventory, mobContainer *C, Boss* boss) {
 	
 		useEnergy(P, cardCost(played));
 	
-        if (strcmp(cardType(played), "Attack") == 0) {
+        if (!strcmp(cardType(played), "Attack")) {
             if (currentMob(*C) != NULL) {
+                // Fighting mobs
                 attacked(cardEffect(played), C);
             } else if (boss != NULL) {
+                // Fighting boss
                 attackedBoss(cardEffect(played), boss);
             }
-        } else if (strcmp(cardType(played), "Shield") == 0) {
+        } else if (!strcmp(cardType(played), "Shield")) {
             P->shield += cardEffect(played);
-        } else if (strcmp(cardType(played), "Draw") == 0) {
+        } else if (!strcmp(cardType(played), "Draw")) {
             initDeckInventoryToHand(Inventory, &P->hand, cardEffect(played));
         }
         pushDiscard(&P->discard, played);
@@ -509,11 +769,17 @@ void merchantScreen(Player *player, cardDeck *inventory) {
         gotoxy(columns - 10, rows + 17);
 		printf("Gold: %d", player->gold);
 
+		// Display card
+	    for (row = 0; row < 2; row++) {
+	        for (column = 0; column < 5; column++) {
+	        	printCards(column, row);
+				displayCardIcon(merchantCards[row][column], (row * 5 + column));
+	        }
+	    }
+
         // Display navigation
         for (row = 0; row < 2; row++) {
             for (column = 0; column < 5; column++) {
-            	printCards(column, row);
-				displayCardIcon(merchantCards[row][column], (row * 5 + column));
                 if (row == currentRow && column == currentCol) {
                     // Position
                     printHand(column, row);
@@ -530,7 +796,6 @@ void merchantScreen(Player *player, cardDeck *inventory) {
 						printf("Sold");
 					}
 				}
-				displayCardIcon(merchantCards[row][column], (row * 5 + column));
             }
         }
         gotoxy(columns - 10, rows + 18);
@@ -564,7 +829,7 @@ void merchantScreen(Player *player, cardDeck *inventory) {
 	            int price = prices[currentRow][currentCol];
 	            if (player->gold >= price) {
 	                addCardToDeck(inventory, selected);
-					g_gameStats.totalCardsOwned++;
+	                g_gameStats.totalCardsOwned++;
 	                player->gold -= price;
 	                printf("\nYou bought %s!\n", cardName(selected));
 	                isBuy = true;
@@ -635,6 +900,7 @@ void printHand(int column, int row){
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2;
 	startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2;
+	
 	
 	startCol = (startCol - 55) + 22 * column;
 	startRow = (startRow - 29) + 15 * row;
@@ -725,6 +991,26 @@ void restScreen(Player *player, cardDeck *deck) {
 	}
 }
 
+void printRestText() {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 27;
+	int startRows = 3;
+	
+	gotoxy(startCol, startRows++); printf("%s     ..      ...                   .x+=:.        s    ", RED);
+	gotoxy(startCol, startRows++); printf("  :~\"8888x :\"%%888x                z`    ^%%      :8    ");
+	gotoxy(startCol, startRows++); printf(" 8    8888Xf  8888>                  .   <k    .88    ");
+	gotoxy(startCol, startRows++); printf("X88x. ?8888k  8888X       .u       .@8Ned8\"   :888ooo ");
+	gotoxy(startCol, startRows++); printf("'8888L'8888X  '%%88X    ud8888.   .@^%%8888\"  -*8888888 ");
+	gotoxy(startCol, startRows++); printf(" \"888X 8888X:xnHH(`` :888'8888. x88:  `)8b.   8888    ");
+	gotoxy(startCol, startRows++); printf("   ?8~ 8888X X8888   d888 '88%%\" 8888N=*8888   8888    ");
+	gotoxy(startCol, startRows++); printf(" -~`   8888> X8888   8888.+\"     %%8\"    R88   8888    ");
+	gotoxy(startCol, startRows++); printf(" :H8x  8888  X8888   8888L        @8Wou 9%%   .8888Lu= ");
+	gotoxy(startCol, startRows++); printf(" 8888> 888~  X8888   '8888c. .+ .888888P`    ^%%888*   ");
+	gotoxy(startCol, startRows++); printf(" 48\"` '8*~   `8888!`  \"88888%%   `   ^\"F        'Y\"    ");
+	gotoxy(startCol, startRows++); printf("  ^-==\"\"      `\"\"       \"YP'                          %s", RESET);
+}
+
 void campFire() { //Size (61, 34)
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
@@ -765,33 +1051,11 @@ void campFire() { //Size (61, 34)
     gotoxy(startCol, startRows++); printf("                         @@+###*@@@                          %s", RESET);
 }
 
-void printRestText() {
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 27;
-	int startRows = 3;
-	
-	gotoxy(startCol, startRows++); printf("%s     ..      ...                   .x+=:.        s    ", RED);
-	gotoxy(startCol, startRows++); printf("  :~\"8888x :\"%%888x                z`    ^%%      :8    ");
-	gotoxy(startCol, startRows++); printf(" 8    8888Xf  8888>                  .   <k    .88    ");
-	gotoxy(startCol, startRows++); printf("X88x. ?8888k  8888X       .u       .@8Ned8\"   :888ooo ");
-	gotoxy(startCol, startRows++); printf("'8888L'8888X  '%%88X    ud8888.   .@^%%8888\"  -*8888888 ");
-	gotoxy(startCol, startRows++); printf(" \"888X 8888X:xnHH(`` :888'8888. x88:  `)8b.   8888    ");
-	gotoxy(startCol, startRows++); printf("   ?8~ 8888X X8888   d888 '88%%\" 8888N=*8888   8888    ");
-	gotoxy(startCol, startRows++); printf(" -~`   8888> X8888   8888.+\"     %%8\"    R88   8888    ");
-	gotoxy(startCol, startRows++); printf(" :H8x  8888  X8888   8888L        @8Wou 9%%   .8888Lu= ");
-	gotoxy(startCol, startRows++); printf(" 8888> 888~  X8888   '8888c. .+ .888888P`    ^%%888*   ");
-	gotoxy(startCol, startRows++); printf(" 48\"` '8*~   `8888!`  \"88888%%   `   ^\"F        'Y\"    ");
-	gotoxy(startCol, startRows++); printf("  ^-==\"\"      `\"\"       \"YP'                          %s", RESET);
-}
-
 void printRest() { //Size (44, 24)
-	highlightLeft();
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 45;
 	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2 - 13;
-
 	gotoxy(startCol, startRows++); printf("%s                            .:--::.          ", GRAYII);
 	gotoxy(startCol, startRows++); printf("                      .*:.*#########*=.        ");
 	gotoxy(startCol, startRows++); printf("                       +*###############-.     ");
@@ -846,7 +1110,6 @@ void printSmith() { //Size (44, 24)
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	int startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 + 7;
 	int startRows = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2 - 13;
-
 	gotoxy(startCol, startRows++); printf("%s                                  .-:.            ", GRAYII);
 	gotoxy(startCol, startRows++); printf("                                 :*###*:            ");
 	gotoxy(startCol, startRows++); printf("                                =#######.           ");
@@ -869,6 +1132,29 @@ void printSmith() { //Size (44, 24)
 	gotoxy(startCol, startRows++); printf("         .-*###########*=.        ");
 	gotoxy(startCol, startRows++); printf("        *##**==#####*=**###       ");
 	gotoxy(startCol, startRows++); printf("        *#####=.   .-######       %s", RESET);
+}
+
+void highlightLeft() {
+	int length, startCol, startRow;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 47;
+	startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2 - 14;
+	
+	for (length = 0; length < 49; length++) {
+		gotoxy(startCol + length, startRow); printf("=");
+	}
+	
+	for (length = 0; length < 26; length++) {
+		gotoxy(startCol, startRow); printf("||");
+		gotoxy(startCol + 49, startRow ); printf("||");
+		startRow++;
+	}
+	
+	startRow--;
+	for (length = 0; length < 49; length++) {
+		gotoxy(startCol + length, startRow); printf("=");
+	}
 }
 
 void printVictoryBanner() {
@@ -971,6 +1257,7 @@ void printLoserBanner() {
     setColorDefault();	
 }
 
+
 void showLoseScreen() {
     clearScreen();
     displayBorder();
@@ -1008,6 +1295,35 @@ void showLoseScreen() {
         break;
 		}
 	}
+}
+
+void printRewardSeparator_Top(int x, int y) {
+    setColorBrightWhite();
+    gotoxy(x, y);     printf("                                                  %s/\\", CYAN);
+    gotoxy(x, y + 1); printf("%s __                                               %s\\/                                               %s__", LYELLOW, CYAN, LYELLOW);
+    gotoxy(x, y + 2); printf("%s(_______________________________________________/\\/\\/\\_______________________________________________)", LYELLOW);
+    setColorDefault();
+}
+
+void printRewardSeparator_Bottom(int x, int y) {
+    setColorBrightWhite();
+    gotoxy(x, y);     printf(" %s_______________________________________________      _______________________________________________", LYELLOW);
+    gotoxy(x, y + 1); printf("%s(__                                             \\/\\/\\/                                             __)", LYELLOW);
+    gotoxy(x, y + 2); printf("                                                  %s/\\", CYAN);
+    gotoxy(x, y + 3); printf("                                                  %s\\/", CYAN);
+    setColorDefault();
+}
+
+void printTreasureChest(int x, int y) {
+    gotoxy(x, y++); printf("%s  __________", BROWN);
+    gotoxy(x, y++); printf("%s /\\____%s;;%s___\\", BROWN, RESET, BROWN);
+    gotoxy(x, y++); printf("%s |/         /", BROWN);
+    gotoxy(x, y++); printf("%s `.%s ())%so%so%s() %s.", BROWN, YELLOW, BLUE, RED, YELLOW, BROWN);
+    gotoxy(x, y++); printf("  %s|\\%s(%%%s()%s*^^%s()%s^\\", BROWN, YELLOW, GREEN, CYAN, YELLOW, BROWN);
+    gotoxy(x, y++); printf(" %s%%%s| |-%s%%%s-------|", YELLOW, BROWN, YELLOW, BROWN);
+    gotoxy(x, y++); printf("%s%% %s\\ |%s %%  %s))   %s|", YELLOW, BROWN, YELLOW, RESET, BROWN);
+    gotoxy(x, y++); printf("%s%%  %s\\|%s%%%s________%s|", YELLOW, BROWN, YELLOW, BROWN, BROWN);
+    gotoxy(x, y++); printf(" %s%%%%%%%s", YELLOW, RESET);
 }
 
 void printWinBanner() {
@@ -1092,114 +1408,6 @@ void showFinalVictoryScreen(Player *P) {
 	}
 
     showGameStats(P);
-}
-
-void printRewardSeparator_Top(int x, int y) {
-    setColorBrightWhite();
-    gotoxy(x, y);     printf("                                                  %s/\\", CYAN);
-    gotoxy(x, y + 1); printf("%s __                                               %s\\/                                               %s__", LYELLOW, CYAN, LYELLOW);
-    gotoxy(x, y + 2); printf("%s(_______________________________________________/\\/\\/\\_______________________________________________)", LYELLOW);
-    setColorDefault();
-}
-
-void printRewardSeparator_Bottom(int x, int y) {
-    setColorBrightWhite();
-    gotoxy(x, y);     printf(" %s_______________________________________________      _______________________________________________", LYELLOW);
-    gotoxy(x, y + 1); printf("%s(__                                             \\/\\/\\/                                             __)", LYELLOW);
-    gotoxy(x, y + 2); printf("                                                  %s/\\", CYAN);
-    gotoxy(x, y + 3); printf("                                                  %s\\/", CYAN);
-    setColorDefault();
-}
-
-
-void printFinalVictoryMessage(int x, int y) {
-	setColorBrightWhite();
-	gotoxy(x, y++); printf("  ________________________________________________________________________________________________________");
-	gotoxy(x, y++); printf(" / \\                                                                                                      \\");
-	gotoxy(x, y++); printf("|  |                   ");
-	setColorYellow(); printf("@=====");
-	setColorBrightWhite(); printf("  ");
-	setColorLightYellow(); printf("A Triumphant Proclamation from the Realm's Edge");
-	setColorBrightWhite(); printf("  ");
-	setColorYellow(); printf("=====@");
-	setColorBrightWhite(); printf("                    |");
-	gotoxy(x, y++); printf(" \\_|                                                                                                      |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorCyan(); printf("Hear ye, hear ye! After a long and desolate silence, the echo of a champion's footfalls is");
-	setColorBrightWhite(); printf("      |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorCyan(); printf("heard at last!");
-	setColorBrightWhite(); printf("                                                                                  |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorLightYellow(); printf("The path you have walked is not for the faint of heart. Many a brave soul has tried and has");
-	setColorBrightWhite(); printf("     |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorLightYellow(); printf("fallen,  their  shadows  a  testament  to  the severity of this ordeal. Yet today, the very");
-	setColorBrightWhite(); printf("     |");
-	gotoxy(x, y++); printf("   |     ");
-	setColorLightYellow(); printf(" destiny  of  this  land  has been reshaped, not by chance, but by a single, unwavering will.");
-	setColorBrightWhite(); printf("    |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorCyan(); printf("And so,  to  you,  the  Conqueror who now stands at this journey's end, we offer our highest");
-	setColorBrightWhite(); printf("    |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorCyan(); printf("honors!  Every  foe  you faced, every  card you  played, was a masterstroke of your peerless");
-	setColorBrightWhite(); printf("    |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorCyan(); printf("strategy and courage.");
-	setColorBrightWhite(); printf("                                                                           |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorLightYellow(); printf("The final sovereign  of  shadow, the  great dragon  itself, now  lies  vanquished before you,");
-	setColorBrightWhite(); printf("   |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorLightYellow(); printf("serving as the  final  chapter to a dark  tale you  alone have closed. From this day forward,");
-	setColorBrightWhite(); printf("   |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorLightYellow(); printf("your name shall be immortalized in song and legend.  Bards will  craft hymns  of the Champion");
-	setColorBrightWhite(); printf("   |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorLightYellow(); printf("who conquered the Trial of Bloodspire, and new knights will whisper your name in the training");
-	setColorBrightWhite(); printf("   |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorLightYellow(); printf("halls with awe.");
-	setColorBrightWhite(); printf("                                                                                 |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorCyan(); printf("Rest now in glorious victory. The entire realm is in your debt. This triumph is yours-eternal");
-	setColorBrightWhite(); printf("   |");
-	gotoxy(x, y++); printf("   |      ");
-	setColorCyan(); printf("and unforgettable.");
-	setColorBrightWhite(); printf("                                                                              |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |                                                                          ");
-	setColorGreen(); printf("With warmest regards,");
-	setColorBrightWhite(); printf("       |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |                                                                         ");
-	setColorYellow(); printf("- The Bloodspire Team -");
-	setColorBrightWhite(); printf("      |");
-	gotoxy(x, y++); printf("   |                                                                                                      |");
-	gotoxy(x, y++); printf("   |   ___________________________________________________________________________________________________|__");
-	gotoxy(x, y++); printf("   |  /                                                                                                     /");
-	gotoxy(x, y++); printf("   \\_/_____________________________________________________________________________________________________/");
-	setColorDefault();
-}
-
-void printTreasureChest(int x, int y) {
-    gotoxy(x, y++); printf("%s  __________", BROWN);
-    gotoxy(x, y++); printf("%s /\\____%s;;%s___\\", BROWN, RESET, BROWN);
-    gotoxy(x, y++); printf("%s |/         /", BROWN);
-    gotoxy(x, y++); printf("%s `.%s ())%so%so%s() %s.", BROWN, YELLOW, BLUE, RED, YELLOW, BROWN);
-    gotoxy(x, y++); printf("  %s|\\%s(%%%s()%s*^^%s()%s^\\", BROWN, YELLOW, GREEN, CYAN, YELLOW, BROWN);
-    gotoxy(x, y++); printf(" %s%%%s| |-%s%%%s-------|", YELLOW, BROWN, YELLOW, BROWN);
-    gotoxy(x, y++); printf("%s%% %s\\ |%s %%  %s))   %s|", YELLOW, BROWN, YELLOW, RESET, BROWN);
-    gotoxy(x, y++); printf("%s%%  %s\\|%s%%%s________%s|", YELLOW, BROWN, YELLOW, BROWN, BROWN);
-    gotoxy(x, y++); printf(" %s%%%%%%%s", YELLOW, RESET);
 }
 
 void showRewardScreen(Player *player, int depth, int type) {
@@ -1313,7 +1521,6 @@ void showRewardScreen(Player *player, int depth, int type) {
             if(key == KEY_RIGHT) selectedIndex = (selectedIndex + 1) % 3;
         } else if (key == KEY_ENTER) {
             playEnterBeep();
-			g_gameStats.totalCardsOwned++;
             cardChosen = true;
         }
     }
@@ -1404,29 +1611,6 @@ void showRewardScreen(Player *player, int depth, int type) {
 	}
 }
 
-void highlightLeft() {
-	int length, startCol, startRow;
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2 - 47;
-	startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2 - 14;
-	
-	for (length = 0; length < 49; length++) {
-		gotoxy(startCol + length, startRow); printf("=");
-	}
-	
-	for (length = 0; length < 26; length++) {
-		gotoxy(startCol, startRow); printf("||");
-		gotoxy(startCol + 49, startRow ); printf("||");
-		startRow++;
-	}
-	
-	startRow--;
-	for (length = 0; length < 49; length++) {
-		gotoxy(startCol + length, startRow); printf("=");
-	}
-}
-
 void highlightRight() {
 	int length, startCol, startRow;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -1475,7 +1659,85 @@ void proceedLabel(){ //Size (33, 7)
 	gotoxy(startCol, startRow++); printf("  //       Press [ESC] to		");
 	gotoxy(startCol, startRow++); printf(" // |\\     __  __  __  __   __|");
 	gotoxy(startCol, startRow++); printf("<<  |/ |~ | | |   |__ |__  |  |");
-	gotoxy(startCol, startRow++); printf(" \\  |  |  |_| |__ |__ |__  |__|");
-	gotoxy(startCol, startRow++); printf("  \\ 		            		");
-	gotoxy(startCol, startRow++); printf("   \\===========================");
+	gotoxy(startCol, startRow++); printf(" \\\\ |  |  |_| |__ |__ |__  |__|");
+	gotoxy(startCol, startRow++); printf("  \\\\ 		            		");
+	gotoxy(startCol, startRow++); printf("   \\\\===========================");
+}
+
+void printFinalVictoryMessage(int x, int y) {
+	setColorBrightWhite();
+	gotoxy(x, y++); printf("  ________________________________________________________________________________________________________");
+	gotoxy(x, y++); printf(" / \\                                                                                                      \\");
+	gotoxy(x, y++); printf("|  |                   ");
+	setColorYellow(); printf("@=====");
+	setColorBrightWhite(); printf("  ");
+	setColorLightYellow(); printf("A Triumphant Proclamation from the Realm's Edge");
+	setColorBrightWhite(); printf("  ");
+	setColorYellow(); printf("=====@");
+	setColorBrightWhite(); printf("                    |");
+	gotoxy(x, y++); printf(" \\_|                                                                                                      |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("Hear ye, hear ye! After a long and desolate silence, the echo of a champion's footfalls is");
+	setColorBrightWhite(); printf("      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("heard at last!");
+	setColorBrightWhite(); printf("                                                                                  |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("The path you have walked is not for the faint of heart. Many a brave soul has tried and has");
+	setColorBrightWhite(); printf("     |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("fallen,  their  shadows  a  testament  to  the severity of this ordeal. Yet today, the very");
+	setColorBrightWhite(); printf("     |");
+	gotoxy(x, y++); printf("   |     ");
+	setColorLightYellow(); printf(" destiny  of  this  land  has been reshaped, not by chance, but by a single, unwavering will.");
+	setColorBrightWhite(); printf("    |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("And so,  to  you,  the  Conqueror who now stands at this journey's end, we offer our highest");
+	setColorBrightWhite(); printf("    |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("honors!  Every  foe  you faced, every  card you  played, was a masterstroke of your peerless");
+	setColorBrightWhite(); printf("    |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("strategy and courage.");
+	setColorBrightWhite(); printf("                                                                           |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("The final sovereign  of  shadow, the  great dragon  itself, now  lies  vanquished before you,");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("serving as the  final  chapter to a dark  tale you  alone have closed. From this day forward,");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("your name shall be immortalized in song and legend.  Bards will  craft hymns  of the Champion");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("who conquered the Trial of Bloodspire, and new knights will whisper your name in the training");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorLightYellow(); printf("halls with awe.");
+	setColorBrightWhite(); printf("                                                                                 |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("Rest now in glorious victory. The entire realm is in your debt. This triumph is yours-eternal");
+	setColorBrightWhite(); printf("   |");
+	gotoxy(x, y++); printf("   |      ");
+	setColorCyan(); printf("and unforgettable.");
+	setColorBrightWhite(); printf("                                                                              |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |                                                                          ");
+	setColorGreen(); printf("With warmest regards,");
+	setColorBrightWhite(); printf("       |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |                                                                         ");
+	setColorYellow(); printf("- The Bloodspire Team -");
+	setColorBrightWhite(); printf("      |");
+	gotoxy(x, y++); printf("   |                                                                                                      |");
+	gotoxy(x, y++); printf("   |   ___________________________________________________________________________________________________|__");
+	gotoxy(x, y++); printf("   |  /                                                                                                     /");
+	gotoxy(x, y++); printf("   \\_/_____________________________________________________________________________________________________/");
+	setColorDefault();
 }
