@@ -5,7 +5,6 @@
 #include "inGameLayout.h"
 #include "map_display.h"
 #include "map_navigation.h"
-#include "stats.h"
 
 
 // Struktur untuk item menu
@@ -19,6 +18,6 @@ void displayMenu(MenuItem menu[], int menuSize, int selectedIndex);
 void executeMenuAction(int menuId);
 void SplashScreen();
 void howToPlay();
-void startGame();
+void startGame(bool loadGame);
 
 #endif

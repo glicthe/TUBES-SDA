@@ -202,7 +202,7 @@ void executeMenuAction(int menuId) {
             gotoxy(startCol, startRow + 6);
             printf("  Choose your path wisely and build your deck strategically!");
             Sleep(2000);
-            startGame();
+            startGame(0);
             break;
             
         case 2:
@@ -219,12 +219,7 @@ void executeMenuAction(int menuId) {
             setColorDefault();
             gotoxy(startCol, startRow + 4);
             printf("  Searching for saved game files...");
-            gotoxy(startCol, startRow + 5);
-            setColorLightRed();
-            printf("  [No saved games found]");
-            setColorDefault();
-            gotoxy(startCol, startRow + 6);
-            printf("  Start a new game to create a save file!");
+           	startGame(1);
             break;
             
         case 3:
@@ -652,26 +647,33 @@ void howToPlay() {
 	}
 }
 
-void startGame() {
-	MapNode* gameMap;
-    g_isGameActive = true;
+void startGame(bool savedGame) {
+	MapNode* gameMap = Nil;
+	GameSave* loadGame = Nil;
+	g_isGameActive = true;
+	
+	initGameStats();		
     srand(time(0));
     hideCursor();
-
-    initGameStats();
-    gameMap = generateMap(1);
-
-    if (gameMap != Nil) {
-        startNavigation(gameMap);
-    } else {
-        clearScreen();
-        gotoxy(0,0);
-        printf("ERROR: Failed to generate map.\n");
-        Sleep(2000);
-    }
+	if (!savedGame){
+		remove("savad_game.txt");
+	    gameMap = generateMap(1);
+	
+	    if (gameMap != Nil) {
+	        startNavigation(gameMap, loadGame);
+	    } else {
+	        clearScreen();
+	        gotoxy(0,0);
+	        printf("ERROR: Failed to generate map.\n");
+	        Sleep(2000);
+	    }
+	} else {
+		loadGame = loadGameProgress("saved_game.txt");
+		startNavigation(gameMap, loadGame);
+	}
 
     clearScreen();
     gotoxy(0,5);
     freeMapTree(gameMap);
+    showCursor();
 }
-
