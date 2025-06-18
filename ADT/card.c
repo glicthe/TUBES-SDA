@@ -29,7 +29,7 @@ void starterDeckInventory(cardDeck *D){
 	int Num = 0;
 	while (Num < 10){
 		if (Num <= 3) {
-			cardAddress addCard = createCard("Slash", "Attack", 1, 8);
+			cardAddress addCard = createCard("Slash", "Attack", 1, 38);
 			addCardToDeck(D, addCard);
 		} else if (Num >= 4 && Num <= 6) {
 			cardAddress addCard = createCard("Block", "Shield", 1, 5);
@@ -480,9 +480,12 @@ void printDeck(cardDeck D, int startCol, int startRow) {
         } else {
             printf("%s", cardName(temp));
         }
-        gotoxy(startCol + boxTopBot - 2, startRow + boxLeftRight);
         setColorRed();
-        printf("[%d]", cardEffect(temp));
+        gotoxy(startCol + boxTopBot - 2, startRow + boxLeftRight);
+        if (cardEffect(temp) > 9) {
+        	gotoxy(startCol + boxTopBot - 3, startRow + boxLeftRight);
+        	printf("[%d]", cardEffect(temp));
+		} else printf("[%d]", cardEffect(temp));
         setColorBrightWhite();
         startCol += (boxTopBot + 5);
         countCard++;
@@ -704,17 +707,17 @@ void printCards(int column, int row) {
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     startCol = (csbi.srWindow.Right - csbi.srWindow.Left + 1) / 2;
     startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2;
-
-    startCol = (startCol - 55) + 22 * column;
+	
+	startCol = (startCol - 55) + 22 * column;
     startRow = (startRow - 13) + 15 * row;
     displayCardAt(startCol, startRow);
 }
 
 void printAllCards(int cardCount) {
-    int i = 0;
+    int col, row, i = 0;
 	for (i; i < cardCount; i++) {
-        int col = i % 5;
-        int row = i / 5;
+		col = i % 5;
+		row = i / 5;
         printCards(col, row);
     }
 }
@@ -731,8 +734,9 @@ void displayCardAt(int startCol, int startRow) {
 }
 
 void displayCardIcon(cardAddress card, int cardNumber) {
-    int col = cardNumber % 5;
-    int row = cardNumber / 5;
+    int col, row; 
+	col = cardNumber % 5;
+    row = cardNumber / 5;
     
     int startCol, startRow;
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -741,7 +745,7 @@ void displayCardIcon(cardAddress card, int cardNumber) {
     startRow = (csbi.srWindow.Bottom - csbi.srWindow.Top + 1) / 2;
 
     startCol = (startCol - 55) + 22 * col;
-    startRow = (startRow - 13) + 15 * row;
+	startRow = (startRow - 13) + 15 * row;
     
 	int i = 3;
 	if (card == Nil){
@@ -763,7 +767,10 @@ void displayCardIcon(cardAddress card, int cardNumber) {
 	printf("[%d]", cardCost(card));
 	gotoxy(startCol + 20 - 3, startRow + 11);
 	setColorRed();
-	printf("[%d]", cardEffect(card));
+	if (cardEffect(card) > 9) {
+		gotoxy(startCol + 20 - 4, startRow + 11);
+		printf("[%d]", cardEffect(card));
+	} else printf("[%d]", cardEffect(card));
 	
 	if (strcmp(cardName(card), "PowerSlash") == 0){
 		setColorLightRed();
