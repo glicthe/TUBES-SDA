@@ -518,8 +518,8 @@ void PlayerQuit(MapNode* mapRoot, Player* player, cardDeck* deckInventory, mobCo
 		printf("\033[1;33;41m<-- USE KEY ARROW LEFT OR RIGHT TO SELECT -->\033[0m\033[1;33m");
 	
 	
-		key = getch();
 		while(1){
+			key = getch();
 				switch(key) {
 					case 224:
 			            key = getch();
