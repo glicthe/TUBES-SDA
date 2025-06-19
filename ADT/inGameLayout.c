@@ -176,9 +176,13 @@ void inGame(int startCol, int startRow, int type, int depth, MapNode* mapRoot, b
 		    		int choose = 0;
 		    		PlayerQuit(mapRoot, &P, &deckInventory, C, boss, &choose);
 					if (choose == 1) {
-		    			running = 0;
-						SplashScreen();
-					} else break;
+		    			g_isGameActive = FALSE;
+						PlaySound(NULL, NULL, SND_PURGE);
+						if (type == 1 || type == 2 || type == 3) {
+							pthread_join(soundBattle, NULL);
+						}
+						return;
+					}
 	                break;
 	            case 'a':
 	            	showDiscardPile(P.discard);

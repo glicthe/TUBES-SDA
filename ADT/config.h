@@ -24,7 +24,7 @@
 // Fungsi untuk posisi Node
 #define NODE_DISPLAY_WIDTH_L 15  // Lebar tampilan node level 1
 #define NODE_DISPLAY_WIDTH_M 12  // Lebar tampilan node level 2
-#define MAP_START_X 15 
+#define MAP_START_X 22 
 #define MAP_START_Y 35
 #define MAX_CHILDREN_DISPLAY 4   // Batasan anak yang bisa ditampilkan dalam satu baris untuk kasus tertentu
 #define MAX_GRANDCHILDREN_DISPLAY 8 // Batasan cucu yang bisa ditampilkan
