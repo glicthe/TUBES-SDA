@@ -357,6 +357,7 @@ void SplashScreen() {
                 
                 Sleep(2000);
                 running = 0;
+                exit(0);
                 break;
             } else {
                 executeMenuAction(menu[selectedIndex].id);
@@ -391,6 +392,7 @@ void SplashScreen() {
             setColorDefault();
             Sleep(1500);
             running = 0;
+            exit(0);
             break;
         }
     }

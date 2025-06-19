@@ -8,7 +8,7 @@
 #include "stats.h"
 
 void inGame(int startCol, int startRow, int battle, int depth, MapNode* mapRoot, boolean checkLoad, GameSave* loadGame);
-void headBar(int startCol, int max, Player P, MapNode* currMap, int turnCounter);
+void headBar(int startCol, int max, Player P, int depth, int turnCounter);
 void battleScreen(int startCol, int startRow, int colunmns, int rows, char* state);
 void showMobPlayer(Boss* boss, mobContainer C, int columns, int rows, boolean state);
 void PlayerQuit(MapNode* mapRoot, Player* player, cardDeck* deckInventory, mobContainer mob, Boss* boss, int *choose);

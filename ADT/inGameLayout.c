@@ -79,7 +79,7 @@ void inGame(int startCol, int startRow, int type, int depth, MapNode* mapRoot, b
 			hideCursor();
 			setColorDefault();
 			
-			headBar(startCol, columns, P, mapRoot, turnCounter); 
+			headBar(startCol, columns, P, depth, turnCounter); 
 			battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default"); 
 			
 			if (type == 1) {
@@ -176,13 +176,12 @@ void inGame(int startCol, int startRow, int type, int depth, MapNode* mapRoot, b
 		    		int choose = 0;
 		    		PlayerQuit(mapRoot, &P, &deckInventory, C, boss, &choose);
 					if (choose == 1) {
-		    			g_isGameActive = FALSE;
 						PlaySound(NULL, NULL, SND_PURGE);
-						if (type == 1 || type == 2 || type == 3) {
-							pthread_join(soundBattle, NULL);
-						}
+						g_isGameActive = FALSE;	
+		    			running = 0;
+						SplashScreen();
 						return;
-					}
+					} else break;
 	                break;
 	            case 'a':
 	            	showDiscardPile(P.discard);
@@ -218,7 +217,7 @@ void inGame(int startCol, int startRow, int type, int depth, MapNode* mapRoot, b
 			displayBorder();
 				
 			battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default"); 
-			headBar(startCol, columns, P, mapRoot, turnCounter);
+			headBar(startCol, columns, P, depth, turnCounter);
 			printMobContainer(C, mobStatsCol, mobStatsRow);
 			printPlayerStatus(P, playerStatsCol, playerStatsRow);
 			showMobPlayer(boss, C, columns, rows, state);
@@ -254,7 +253,7 @@ void inGame(int startCol, int startRow, int type, int depth, MapNode* mapRoot, b
 		char bossAction[10];
 		int quantity = 0 ;
 		battleScreen(battleScreenCol, battleScreenRow, columns, rows, "default");
-		headBar(startCol, columns, P, mapRoot, turnCounter);
+		headBar(startCol, columns, P, depth, turnCounter);
 		
 		printBossStats(boss, mobStatsCol, mobStatsRow);
 		printPlayerStatus(P, playerStatsCol, playerStatsRow);
@@ -557,7 +556,7 @@ void PlayerQuit(MapNode* mapRoot, Player* player, cardDeck* deckInventory, mobCo
 	
 }
 
-void headBar(int startCol, int max, Player P, MapNode* currMap, int turnCounter){
+void headBar(int startCol, int max, Player P, int depth, int turnCounter){
 	int i, headBarRow = 3;
 	int headBarCol = 2;;
 	int checkTurn = turnCounter % 2;
@@ -608,7 +607,7 @@ void headBar(int startCol, int max, Player P, MapNode* currMap, int turnCounter)
 	printf("===========");
     gotoxy(startCol + 80, headBarRow + 3);
 	setColorGreen();
-    printf("DEPTH [%d]", currMap->depth + 1);
+    printf("DEPTH [%d]", depth);
     gotoxy(startCol + 79, headBarRow + 4);
 	setColorBrightWhite();
 	printf("===========");
@@ -1530,7 +1529,10 @@ void showRewardScreen(Player *player, int depth, int type) {
     }
 
     for (i = 0; i < 3; i++) {
-        if (i == selectedIndex) pushDiscard(&(player->discard), cardChoices[i]);
+        if (i == selectedIndex) {
+			pushDiscard(&(player->discard), cardChoices[i]);
+        	g_gameStats.totalCardsOwned++;
+		}
         else freeCard(cardChoices[i]);
     }
 

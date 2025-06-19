@@ -169,7 +169,7 @@ void checkMobHealth(mobContainer *C){
 	if (curr != Nil && mobHealth(curr) <= 0){
 		deleteCurrentMob(C);
 		g_gameStats.enemiesDefeated++;
-	}
+	}	
 }
 
 mobAddress search(mobContainer C, const char* mobType, int mobPosition){
@@ -328,33 +328,50 @@ void printCurrentMob(mobContainer C, int startCol, int startRow) {
 }
 
 void printMob(int startCol, int startRow, int columns, int rows, mobContainer C, boolean state) {
-	int i;
+	int i, temp;
 	mobAddress current = firstMob(C);
+	int mobCount = countMob(C);
 	
 	if (current != Nil) {
-		startCol = columns - 125;
+		if (mobCount > 1) {
+			startCol = columns - 123;
+		} else startCol = columns - 85;
 		startRow = rows / 3;
 		while (current != Nil) {
 			i = 1;
 			if (!strcmp(mobType(current), "Goblin")) {
 				setColorLightCyan();
-				gotoxy(startCol, startRow + i); i++;
+				temp = startCol + 11;
+				gotoxy(temp, startRow + i); i++;
 				printf(" [%d] ", mobCounter(current));
-				if (!state) setColorRed();
-				else setColorGreen();
+				setColorGreen();
 			} else if (!strcmp(mobType(current), "Ghost")) {
 				i = 1;
 				setColorLightCyan();
-				gotoxy(startCol, startRow + i); i++;
+				temp = startCol + 7;
+				gotoxy(temp, startRow + i); i++;
 				printf(" [%d] ", mobCounter(current));
+				setColorBrightWhite(); 
+			}
+			if (current == currentMob(C)){
+				setColorRed();
+				gotoxy(temp, startRow - 7);
+				printf("  ||   ");
+				gotoxy(temp, startRow - 6);
+				printf("  ||   ");
+				gotoxy(temp, startRow - 5);
+				printf("  ||   ");
+				gotoxy(temp, startRow - 4);
+				printf("\\\\||// ");
+				gotoxy(temp, startRow - 3);
+				printf(" \\\\//  ");
+				gotoxy(temp, startRow - 2);
+				printf("  \\/   ");
 				if (!state) setColorRed();
-				else setColorBrightWhite(); 
+				else if (!strcmp(mobType(current), "Ghost")) setColorBrightWhite(); 
+				else if (!strcmp(mobType(current), "Goblin")) setColorGreen();
 			}
-			if (current == currentMob(C) && state){
-				gotoxy(startCol, startRow);
-				setColorGray();
-			}
-	
+			
 			if (!strcmp(mobType(current), "Goblin")){
 				gotoxy(startCol, startRow + i); i++;
 				printf("            _.._     \n");
@@ -420,7 +437,7 @@ void printMob(int startCol, int startRow, int columns, int rows, mobContainer C,
 				gotoxy(startCol, startRow + i); i++;
 				printf("    `.;`;`-;-`;-`;-`\n");
 			}
-			startCol += 35;
+			startCol += 40;
 			current = mobNext(current);
 		}
 	} 
@@ -442,4 +459,3 @@ void randGenerateMob(mobContainer *C){
 		makeMob -= 1;
 	}
 }
-
