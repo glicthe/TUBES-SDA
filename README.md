@@ -10,6 +10,8 @@ Our Note:
 [Note BloodSpire](https://app.milanote.com/1UePu51in9Rm6S?p=pCgOIjerhCU)\
 Flowchart:
 [Game Flowchart](https://miro.com/welcomeonboard/Mmp5aW5hR2NoQ2hFTzJ1NGZhSmpaUHJNdlUxelduUXYzWnRlTVg5RElSeEtRSE5zQ0Z5c0xpaFVRNG45WHpWWWtFUld6MVgzZ3FYV0Z5TDkxYUVJb3N4bHprU3RKV1RRYVJFNUZkUlVMWDdOVVJZczZMKzdiUzFTRXRvVTQycjlzVXVvMm53MW9OWFg5bkJoVXZxdFhRPT0hdjE=?share_link_id=318571456594)
+Our Progress:
+[RoadMap](https://github.com/users/glicthe/projects/3/views/1)
 <br>
 <br>
 <br>
