@@ -24,6 +24,35 @@ Dengan Kelompok kami yang beranggotakan:
 <br>
 
 ## ⚙️ Parts Of The Implementations
+Data Name | Implementations  
+--- | ---
+Map | `NBT`
+BossPattern| `Queue`
+DiscardPile| `Stack`
+Deck| `DLL`
+HandCard| `DLL`
+MobAddress| `DLL` |
 
+<br>
+<br>
+<br>
 
-
+## 👷Contributions
+Nama Anggota | Contribution  
+--- | ---  
+Faris Ichsan Alyawa | 1. Membuat Player
+&nbsp;| 2. Membuat Card
+&nbsp;| 3. Membuat Merchant dan Rest Site 
+&nbsp;| 4. Viewing kartu  
+&nbsp; | &nbsp;  
+Fauzan Juniar Mulyana | 1. Membuat mob
+&nbsp;| 2. Membuat Boss
+&nbsp;| 3. Membuat LoadGame 
+&nbsp;| 4. Mengintegrasikan file-file inti  
+&nbsp;| 5. Membuat in-game battle  
+&nbsp;| 6. Menggabungkan background sound
+&nbsp;| &nbsp;
+Rangga Muhamad Fajar | 1. Membuat Game Map
+&nbsp;| 2. Membuat Menu Utama
+&nbsp;| 3. Membuat UI dan navigasi program
+&nbsp;| 4. Membuat Statistik Player
