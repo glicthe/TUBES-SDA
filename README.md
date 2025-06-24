@@ -25,6 +25,20 @@ Dengan Kelompok kami yang beranggotakan:
 <br>
 <br>
 
+## ❗**IMPORTANT**
+If you want to open the program please note to change this setting:
+- when using **DevC++** after press `F11` change the terminal setting launch size columns and rows to\
+`Columns = 156`, and `Rows = 52` or change your laptop resulution size to `1920x1200`
+- if using `1920x1200` then after `F11` press `F11` again for fulscreen.\
+  if not using `1920x1200` then just change the terminal size **AND** refrain for the terminal to fullscreen
+- then **zoom out** 4 times or `ctrl` + `-` 4 times
+- after that add this in the project settings\
+  goto `project options` -> `parameters` -> `linker` -> type `-lwinmm` -> `'OK'` 
+
+<br>
+<br>
+<br>
+
 ## ⚙️ Parts Of The Implementations
 Data Name | Implementations  
 --- | ---
